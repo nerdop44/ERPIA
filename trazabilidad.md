@@ -4,7 +4,7 @@
 - **Nombre del Proyecto:** ERPIA (ERP de Agentes de IA Multi-Empresas).
 - **Objetivo:** Crear un MVP de una plataforma web robusta, modular y multi-empresa que actúe como una mesa de control centralizada para agentes de IA con orquestación mediante n8n, Hermes y Antigravity.
 - **Estado:** Inicialización de archivos de contexto y entorno.
-- **Entorno:** VPS IP `37.60.235.245`, base de datos PostgreSQL, dominio `erpia.venrides.com`.
+- **Entorno:** VPS IP `37.60.236.245`, base de datos PostgreSQL, dominio `erpia.venrides.com`.
 - **Repositorio:** `nerdop44/ERPIA` en GitHub (Público).
 
 ## Registro de Decisiones y Cambios

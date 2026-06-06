@@ -15,7 +15,7 @@ graph TD
 ```
 
 ## Especificaciones de Infraestructura y Despliegue
-- **VPS IP:** `37.60.235.245`
+- **VPS IP:** `37.60.236.245`
 - **Dominio:** `erpia.venrides.com`
 - **Base de Datos:** PostgreSQL en contenedor Docker.
 - **n8n:** Ejecutándose en contenedor Docker en la misma red.
