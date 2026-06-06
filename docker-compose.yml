@@ -34,6 +34,7 @@ services:
         condition: service_healthy
     volumes:
       - ./backend:/app/backend
+      - ./frontend:/app/frontend
 
   n8n:
     image: docker.n8n.io/n8nio/n8n:latest
@@ -60,20 +61,6 @@ services:
     volumes:
       - n8n_data:/home/node/.n8n
 
-  nginx:
-    image: nginx:alpine
-    container_name: erpia_nginx
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./frontend:/usr/share/nginx/html:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-    depends_on:
-      - backend
-      - n8n
 
 volumes:
   postgres_data:

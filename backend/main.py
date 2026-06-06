@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 from typing import List, Optional
 from fastapi import FastAPI, Depends, HTTPException, WebSocket, WebSocketDisconnect, status
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from backend.database import engine, Base, get_db
@@ -305,3 +306,6 @@ async def create_log(log: schemas.LogAuditoriaCreate, db: Session = Depends(get_
 @app.get("/api/empresas/{empresa_id}/logs", response_model=List[schemas.LogAuditoriaResponse])
 def get_logs(empresa_id: int, db: Session = Depends(get_db)):
     return db.query(models.LogAuditoria).filter(models.LogAuditoria.empresa_id == empresa_id).order_by(models.LogAuditoria.timestamp.asc()).all()
+
+# Servir archivos estáticos del frontend
+app.mount("/", StaticFiles(directory="frontend", html=True), name="static")
