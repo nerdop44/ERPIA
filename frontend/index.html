@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERPIA - Control de Agentes de IA</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-main: #0B0F19;
+            --bg-card: rgba(17, 24, 39, 0.7);
+            --bg-sidebar: #0D1424;
+            --accent: #3B82F6;
+            --accent-glow: rgba(59, 130, 246, 0.15);
+            --text-main: #F3F4F6;
+            --text-muted: #9CA3AF;
+            --border: rgba(255, 255, 255, 0.08);
+            
+            --status-idle: #6B7280;
+            --status-working: #10B981;
+            --status-approval: #F59E0B;
+            
+            --font-display: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 24px;
+            background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            color: #3B82F6;
+            -webkit-text-fill-color: initial;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.03);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--status-idle);
+        }
+
+        .status-dot.connected {
+            background-color: var(--status-working);
+            box-shadow: 0 0 8px var(--status-working);
+        }
+
+        .status-dot.disconnected {
+            background-color: #EF4444;
+            box-shadow: 0 0 8px #EF4444;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 320px 1fr 400px;
+            height: calc(100vh - 70px);
+            background: radial-gradient(circle at 50% 50%, #111827 0%, #0B0F19 100%);
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .column:last-child {
+            border-right: none;
+        }
+
+        .column-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .column-content {
+            padding: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .left-col {
+            background-color: var(--bg-sidebar);
+        }
+
+        .company-selector-container {
+            margin-bottom: 25px;
+        }
+
+        label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        select:focus, input:focus, textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .config-section {
+            margin-top: 25px;
+            border-top: 1px solid var(--border);
+            padding-top: 25px;
+        }
+
+        .config-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .config-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .config-key {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: bold;
+            color: #60A5FA;
+        }
+
+        .config-type {
+            font-size: 9px;
+            background: rgba(59, 130, 246, 0.2);
+            color: #93C5FD;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .config-value {
+            font-size: 13px;
+            color: var(--text-muted);
+            word-break: break-all;
+        }
+
+        .delete-config-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: transparent;
+            border: none;
+            color: rgba(239, 68, 68, 0.7);
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-config-btn:hover {
+            color: #EF4444;
+        }
+
+        .center-col {
+            background: transparent;
+        }
+
+        .kanban-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            height: 100%;
+        }
+
+        .kanban-lane {
+            background: rgba(255, 255, 255, 0.01);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .lane-header {
+            padding: 15px;
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .lane-count {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .lane-cards {
+            padding: 15px;
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .agent-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .agent-name {
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-main);
+        }
+
+        .agent-status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+
+        .status-0 {
+            background-color: rgba(107, 114, 128, 0.15);
+            color: #D1D5DB;
+            border: 1px solid rgba(107, 114, 128, 0.3);
+        }
+
+        .status-1 {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #6EE7B7;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .status-1 .card-dot {
+            animation: pulse-green 1.5s infinite;
+        }
+
+        .status-2 {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: #FCD34D;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-2 .card-dot {
+            animation: pulse-orange 1.5s infinite;
+        }
+
+        .card-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: currentColor;
+            display: inline-block;
+        }
+
+        .agent-role {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .agent-task {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-size: 12px;
+        }
+
+        .agent-task-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 3px;
+            display: block;
+        }
+
+        .agent-task-content {
+            color: #93C5FD;
+            font-weight: 500;
+        }
+
+        .btn-approve {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            margin-top: 12px;
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .right-col {
+            background-color: #080C14;
+        }
+
+        .terminal-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 15px;
+        }
+
+        .terminal-window {
+            background-color: #030712;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .terminal-header {
+            background-color: #0E131F;
+            padding: 8px 15px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .terminal-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .t-dot-red { background-color: #EF4444; }
+        .t-dot-yellow { background-color: #F59E0B; }
+        .t-dot-green { background-color: #10B981; }
+
+        .terminal-title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-left: 10px;
+        }
+
+        .terminal-body {
+            padding: 15px;
+            overflow-y: auto;
+            flex-grow: 1;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .log-line {
+            border-left: 2px solid rgba(255, 255, 255, 0.05);
+            padding-left: 8px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .log-time {
+            color: #6B7280;
+            margin-right: 6px;
+        }
+
+        .log-agent {
+            color: #60A5FA;
+            font-weight: 500;
+            margin-right: 6px;
+        }
+
+        .log-text {
+            color: #E5E7EB;
+        }
+
+        .log-text.success { color: #34D399; }
+        .log-text.warning { color: #FBBF24; }
+        .log-text.error { color: #F87171; }
+
+        .terminal-input-line {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--status-working);
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .terminal-cursor {
+            width: 7px;
+            height: 14px;
+            background-color: var(--status-working);
+            animation: blink 1s step-end infinite;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--bg-sidebar);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            width: 450px;
+            max-width: 90%;
+            padding: 25px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: modalSlide 0.3s ease-out;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+
+        .modal-title {
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        @keyframes pulse-orange {
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+
+        @keyframes blink {
+            from, to { background-color: transparent }
+            50% { background-color: var(--status-working) }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes modalSlide {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .lane-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dot-idle { color: var(--status-idle); }
+        .dot-working { color: var(--status-working); }
+        .dot-approval { color: var(--status-approval); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-brain"></i>
+            <span>ERPIA Control Panel</span>
+        </div>
+        <div class="connection-status">
+            <span id="ws-dot" class="status-dot disconnected"></span>
+            <span id="ws-text">Conectando WebSocket...</span>
+        </div>
+    </header>
+
+    <main>
+        
+        <section class="column left-col">
+            <div class="column-header">
+                <span>Organización</span>
+            </div>
+            
+            <div class="column-content">
+                <div class="company-selector-container">
+                    <label for="company-select">Empresa Activa</label>
+                    <div style="display:flex; gap: 8px;">
+                        <select id="company-select" onchange="onCompanyChange()">
+                        </select>
+                        <button class="btn" style="width: auto; padding: 10px;" onclick="openModal('modal-company')">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <label style="margin-bottom:0;">Configuraciones</label>
+                        <button class="btn" style="width:auto; padding: 5px 10px; font-size: 11px;" onclick="openModal('modal-config')">
+                            <i class="fa-solid fa-plus"></i> Agregar
+                        </button>
+                    </div>
+                    <div id="configs-container">
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="openModal('modal-agent')">
+                        <i class="fa-solid fa-robot"></i> Registrar Agente
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="column center-col">
+            <div class="column-header">
+                <span>Tablero de Operaciones</span>
+                <span id="active-company-name" style="font-weight: 500; font-size: 14px; text-transform: none; color: #60A5FA;">Demo Empresa</span>
+            </div>
+            
+            <div class="column-content">
+                <div class="kanban-board">
+                    
+                    <div class="kanban-lane">
+                        <div class="lane-header">
+                            <div class="lane-title">
+                                <i class="fa-solid fa-moon dot-idle"></i>
+                                <span>En Suspenso</span>
+                            </div>
+                            <span class="lane-count" id="count-idle">0</span>
+                        </div>
+                        <div class="lane-cards" id="lane-idle">
+                        </div>
+                    </div>
+
+                    <div class="kanban-lane">
+                        <div class="lane-header">
+                            <div class="lane-title">
+                                <i class="fa-solid fa-gears dot-working"></i>
+                                <span>Trabajando</span>
+                            </div>
+                            <span class="lane-count" id="count-working">0</span>
+                        </div>
+                        <div class="lane-cards" id="lane-working">
+                        </div>
+                    </div>
+
+                    <div class="kanban-lane">
+                        <div class="lane-header">
+                            <div class="lane-title">
+                                <i class="fa-solid fa-user-shield dot-approval"></i>
+                                <span>Aprobación</span>
+                            </div>
+                            <span class="lane-count" id="count-approval">0</span>
+                        </div>
+                        <div class="lane-cards" id="lane-approval">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section class="column right-col">
+            <div class="column-header">
+                <span>Logs en Tiempo Real</span>
+                <button class="btn" style="width: auto; padding: 4px 8px; font-size: 11px;" onclick="clearLogs()">
+                    Limpiar
+                </button>
+            </div>
+            
+            <div class="terminal-container">
+                <div class="terminal-window">
+                    <div class="terminal-header">
+                        <span class="terminal-dot t-dot-red"></span>
+                        <span class="terminal-dot t-dot-yellow"></span>
+                        <span class="terminal-dot t-dot-green"></span>
+                        <span class="terminal-title">auditoria_global.log</span>
+                    </div>
+                    <div class="terminal-body" id="logs-container">
+                        <div class="log-line">
+                            <span class="log-time">[SYSTEM]</span>
+                            <span class="log-text">Consola inicializada correctamente. Esperando logs...</span>
+                        </div>
+                    </div>
+                    <div style="padding: 10px 15px; border-top: 1px solid var(--border); background-color: #060912;">
+                        <div class="terminal-input-line">
+                            <span>$ listenws --host erpia.venrides.com</span>
+                            <span class="terminal-cursor"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="modal-company" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Registrar Nueva Empresa</span>
+                <button class="close-modal" onclick="closeModal('modal-company')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="company-name-input">Nombre de la Empresa</label>
+                <input type="text" id="company-name-input" placeholder="Ej: Empresa Acme S.A.">
+            </div>
+            <button class="btn" onclick="submitCompany()">Crear Empresa</button>
+        </div>
+    </div>
+
+    <div id="modal-config" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Agregar Configuración Global</span>
+                <button class="close-modal" onclick="closeModal('modal-config')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="config-key-input">Clave (Ej: ODOO_URL)</label>
+                <input type="text" id="config-key-input" placeholder="Ingrese la clave">
+            </div>
+            <div class="form-group">
+                <label for="config-value-input">Valor</label>
+                <input type="text" id="config-value-input" placeholder="Ingrese el valor">
+            </div>
+            <div class="form-group">
+                <label for="config-type-select">Tipo</label>
+                <select id="config-type-select">
+                    <option value="API">API Link/Token</option>
+                    <option value="MCP">MCP Server Configuration</option>
+                    <option value="SKILL">Python Skill Code</option>
+                    <option value="CRON">Cron Job Planificador</option>
+                </select>
+            </div>
+            <button class="btn" onclick="submitConfig()">Agregar Configuración</button>
+        </div>
+    </div>
+
+    <div id="modal-agent" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Registrar Nuevo Agente</span>
+                <button class="close-modal" onclick="closeModal('modal-agent')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="agent-name-input">Nombre del Agente</label>
+                <input type="text" id="agent-name-input" placeholder="Ej: Agente Contable">
+            </div>
+            <div class="form-group">
+                <label for="agent-prompt-input">Rol / System Prompt</label>
+                <textarea id="agent-prompt-input" rows="4" placeholder="Ej: Ejecutar conciliaciones y verificar discrepancias de IVA."></textarea>
+            </div>
+            <button class="btn" onclick="submitAgent()">Registrar Agente</button>
+        </div>
+    </div>
+
+    <script>
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const apiBaseUrl = isLocalhost ? 'http://localhost:8000' : `${window.location.protocol}//${window.location.host}`;
+        const wsBaseUrl = isLocalhost ? 'ws://localhost:8000/ws/dashboard' : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/dashboard`;
+
+        let selectedCompanyId = null;
+        let wsConnection = null;
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            await loadCompanies();
+            initWebSocket();
+        });
+
+        function initWebSocket() {
+            const wsDot = document.getElementById('ws-dot');
+            const wsText = document.getElementById('ws-text');
+
+            console.log("Conectando a WebSocket:", wsBaseUrl);
+            wsConnection = new WebSocket(wsBaseUrl);
+
+            wsConnection.onopen = () => {
+                wsDot.className = 'status-dot connected';
+                wsText.innerText = 'Canal en Vivo Conectado';
+                addSystemLog('Conectado al servidor WebSocket en tiempo real.');
+            };
+
+            wsConnection.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+                console.log("Mensaje de WebSocket recibido:", message);
+                handleWebSocketMessage(message);
+            };
+
+            wsConnection.onclose = () => {
+                wsDot.className = 'status-dot disconnected';
+                wsText.innerText = 'Desconectado - Reconectando...';
+                addSystemLog('[SISTEMA] Conexión WebSocket perdida. Intentando reconexión en 5s...', 'error');
+                setTimeout(initWebSocket, 5000);
+            };
+
+            wsConnection.onerror = (err) => {
+                console.error("Error en WebSocket:", err);
+                wsConnection.close();
+            };
+        }
+
+        function handleWebSocketMessage(message) {
+            const { type, data } = message;
+
+            if (type === 'nuevo_log') {
+                if (data.empresa_id === selectedCompanyId) {
+                    appendLogLine(data);
+                }
+            } else if (type === 'agente_status_update' || type === 'agente_creado') {
+                if (data.empresa_id === selectedCompanyId) {
+                    loadAgentsAndTasks();
+                }
+            } else if (type === 'tarea_creada' || type === 'tarea_status_update') {
+                if (data.empresa_id === selectedCompanyId) {
+                    loadAgentsAndTasks();
+                }
+            }
+        }
+
+        async function loadCompanies() {
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/empresas`);
+                const companies = await res.json();
+                
+                const select = document.getElementById('company-select');
+                select.innerHTML = '';
+
+                if (companies.length === 0) {
+                    await createDefaultCompany();
+                    return;
+                }
+
+                companies.forEach(company => {
+                    const option = document.createElement('option');
+                    option.value = company.id;
+                    option.innerText = company.nombre;
+                    select.appendChild(option);
+                });
+
+                if (!selectedCompanyId) {
+                    selectedCompanyId = companies[0].id;
+                }
+                select.value = selectedCompanyId;
+                
+                document.getElementById('active-company-name').innerText = select.options[select.selectedIndex].text;
+                
+                await loadConfigs();
+                await loadAgentsAndTasks();
+                await loadLogs();
+            } catch (err) {
+                console.error("Error cargando empresas:", err);
+                addSystemLog('Error al conectar con la API del servidor.', 'error');
+            }
+        }
+
+        async function createDefaultCompany() {
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/empresas`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre: 'Empresa Demo S.A.', activo: true })
+                });
+                if (res.ok) {
+                    await loadCompanies();
+                }
+            } catch (err) {
+                console.error("Error creando empresa por defecto:", err);
+            }
+        }
+
+        async function onCompanyChange() {
+            const select = document.getElementById('company-select');
+            selectedCompanyId = parseInt(select.value);
+            document.getElementById('active-company-name').innerText = select.options[select.selectedIndex].text;
+            
+            await loadConfigs();
+            await loadAgentsAndTasks();
+            await loadLogs();
+        }
+
+        async function loadConfigs() {
+            const container = document.getElementById('configs-container');
+            container.innerHTML = '<span class="log-time">Cargando configs...</span>';
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/empresas/${selectedCompanyId}/configuraciones`);
+                const configs = await res.json();
+                container.innerHTML = '';
+                
+                if (configs.length === 0) {
+                    container.innerHTML = '<div style="font-size:12px; color:var(--text-muted);">Sin configuraciones registradas.</div>';
+                    return;
+                }
+
+                configs.forEach(conf => {
+                    const card = document.createElement('div');
+                    card.className = 'config-card';
+                    card.innerHTML = `
+                        <div class="config-card-header">
+                            <span class="config-key">${conf.clave}</span>
+                            <span class="config-type">${conf.tipo}</span>
+                        </div>
+                        <div class="config-value">${conf.valor}</div>
+                        <button class="delete-config-btn" onclick="deleteConfig(${conf.id})">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) {
+                console.error("Error cargando configs:", err);
+            }
+        }
+
+        async function loadAgentsAndTasks() {
+            try {
+                const resAgents = await fetch(`${apiBaseUrl}/api/empresas/${selectedCompanyId}/agentes`);
+                const agents = await resAgents.json();
+
+                const resTasks = await fetch(`${apiBaseUrl}/api/empresas/${selectedCompanyId}/tareas`);
+                const tasks = await resTasks.json();
+
+                const laneIdle = document.getElementById('lane-idle');
+                const laneWorking = document.getElementById('lane-working');
+                const laneApproval = document.getElementById('lane-approval');
+
+                laneIdle.innerHTML = '';
+                laneWorking.innerHTML = '';
+                laneApproval.innerHTML = '';
+
+                let countIdle = 0;
+                let countWorking = 0;
+                let countApproval = 0;
+
+                agents.forEach(agent => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    
+                    let activeTaskContent = 'Ninguna';
+                    let taskHtml = '';
+
+                    const agentTask = tasks.find(t => t.agente_id === agent.id && (t.estado === 'Progreso' || t.estado === 'Aprobacion'));
+                    
+                    if (agent.status === 1 && agent.tarea_actual) {
+                        activeTaskContent = agent.tarea_actual;
+                    } else if (agent.status === 2 && agentTask) {
+                        activeTaskContent = agentTask.titulo;
+                        taskHtml = `
+                            <div class="agent-task" style="margin-bottom:8px;">
+                                <span class="agent-task-label">Reclamo / Bloqueo</span>
+                                <div style="font-size:11px; color:#FCD34D;">${agentTask.descripcion || 'Esperando aprobación de flujo crítico.'}</div>
+                            </div>
+                            <button class="btn btn-approve" onclick="approveTask(${agentTask.id})">
+                                <i class="fa-solid fa-check"></i> Aprobar Acción
+                            </button>
+                        `;
+                    }
+
+                    let statusText = 'Suspenso';
+                    let statusClass = 'status-0';
+                    if (agent.status === 1) {
+                        statusText = 'Trabajando';
+                        statusClass = 'status-1';
+                    } else if (agent.status === 2) {
+                        statusText = 'Aprobación';
+                        statusClass = 'status-2';
+                    }
+
+                    card.innerHTML = `
+                        <div class="agent-card-header">
+                            <span class="agent-name">${agent.nombre}</span>
+                            <span class="agent-status-indicator ${statusClass}">
+                                <span class="card-dot"></span>
+                                ${statusText}
+                            </span>
+                        </div>
+                        <div class="agent-role">${agent.rol_prompt || 'Sin rol definido.'}</div>
+                        <div class="agent-task" style="margin-bottom:8px;">
+                            <span class="agent-task-label">Tarea Actual</span>
+                            <span class="agent-task-content">${activeTaskContent}</span>
+                        </div>
+                        ${taskHtml}
+                    `;
+
+                    if (agent.status === 0) {
+                        laneIdle.appendChild(card);
+                        countIdle++;
+                    } else if (agent.status === 1) {
+                        laneWorking.appendChild(card);
+                        countWorking++;
+                    } else if (agent.status === 2) {
+                        laneApproval.appendChild(card);
+                        countApproval++;
+                    }
+                });
+
+                document.getElementById('count-idle').innerText = countIdle;
+                document.getElementById('count-working').innerText = countWorking;
+                document.getElementById('count-approval').innerText = countApproval;
+
+            } catch (err) {
+                console.error("Error cargando Kanban:", err);
+            }
+        }
+
+        async function loadLogs() {
+            const container = document.getElementById('logs-container');
+            container.innerHTML = '';
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/empresas/${selectedCompanyId}/logs`);
+                const logs = await res.json();
+                logs.forEach(log => {
+                    appendLogLine(log);
+                });
+            } catch (err) {
+                console.error("Error cargando logs:", err);
+            }
+        }
+
+        async function submitCompany() {
+            const input = document.getElementById('company-name-input');
+            const nombre = input.value.trim();
+            if (!nombre) return;
+
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/empresas`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre })
+                });
+                if (res.ok) {
+                    const comp = await res.json();
+                    selectedCompanyId = comp.id;
+                    await loadCompanies();
+                    closeModal('modal-company');
+                    input.value = '';
+                } else {
+                    const err = await res.json();
+                    alert(err.detail);
+                }
+            } catch (err) {
+                console.error("Error:", err);
+            }
+        }
+
+        async function submitConfig() {
+            const key = document.getElementById('config-key-input').value.trim();
+            const val = document.getElementById('config-value-input').value.trim();
+            const type = document.getElementById('config-type-select').value;
+            
+            if (!key || !val) return;
+
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/configuraciones`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        empresa_id: selectedCompanyId,
+                        clave: key,
+                        valor: val,
+                        tipo: type
+                    })
+                });
+                if (res.ok) {
+                    await loadConfigs();
+                    closeModal('modal-config');
+                    document.getElementById('config-key-input').value = '';
+                    document.getElementById('config-value-input').value = '';
+                }
+            } catch (err) {
+                console.error("Error:", err);
+            }
+        }
+
+        async function submitAgent() {
+            const nombre = document.getElementById('agent-name-input').value.trim();
+            const rol = document.getElementById('agent-prompt-input').value.trim();
+
+            if (!nombre) return;
+
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/agentes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        empresa_id: selectedCompanyId,
+                        nombre,
+                        rol_prompt: rol,
+                        status: 0
+                    })
+                });
+                if (res.ok) {
+                    await loadAgentsAndTasks();
+                    closeModal('modal-agent');
+                    document.getElementById('agent-name-input').value = '';
+                    document.getElementById('agent-prompt-input').value = '';
+                }
+            } catch (err) {
+                console.error("Error:", err);
+            }
+        }
+
+        async function deleteConfig(id) {
+            if (!confirm('¿Seguro que desea eliminar esta configuración?')) return;
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/configuraciones/${id}`, {
+                    method: 'DELETE'
+                });
+                if (res.ok) {
+                    await loadConfigs();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function approveTask(taskId) {
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/tareas/${taskId}/aprobar`, {
+                    method: 'PUT'
+                });
+                if (res.ok) {
+                    await loadAgentsAndTasks();
+                }
+            } catch (err) {
+                console.error("Error aprobando tarea:", err);
+            }
+        }
+
+        function appendLogLine(log) {
+            const container = document.getElementById('logs-container');
+            const line = document.createElement('div');
+            line.className = 'log-line';
+
+            const date = new Date(log.timestamp);
+            const timeStr = date.toLocaleTimeString();
+
+            let typeClass = '';
+            if (log.mensaje.includes('[ÉXITO]')) {
+                typeClass = 'success';
+            } else if (log.mensaje.includes('[ATENCIÓN]') || log.mensaje.includes('espera')) {
+                typeClass = 'warning';
+            } else if (log.mensaje.includes('[ERROR]')) {
+                typeClass = 'error';
+            }
+
+            line.innerHTML = `
+                <span class="log-time">[${timeStr}]</span>
+                <span class="log-text ${typeClass}">${log.mensaje}</span>
+            `;
+
+            container.appendChild(line);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function addSystemLog(text, type = '') {
+            const container = document.getElementById('logs-container');
+            const line = document.createElement('div');
+            line.className = 'log-line';
+            line.innerHTML = `
+                <span class="log-time">[SYSTEM]</span>
+                <span class="log-text ${type}">${text}</span>
+            `;
+            container.appendChild(line);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logs-container').innerHTML = '';
+        }
+
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

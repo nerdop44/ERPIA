@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: erpia_db
+    restart: always
+    environment:
+      POSTGRES_DB: erpia_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d erpia_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: erpia_backend
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres_password@db:5432/erpia_db
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app/backend
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: erpia_n8n
+    restart: always
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=db
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=erpia_db
+      - DB_POSTGRESDB_USER=postgres
+      - DB_POSTGRESDB_PASSWORD=postgres_password
+      - N8N_PORT=5678
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=admin_password
+      - N8N_PATH=/n8n/
+      - WEBHOOK_TUNNEL_URL=http://erpia.venrides.com/n8n/
+    ports:
+      - "5678:5678"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+  nginx:
+    image: nginx:alpine
+    container_name: erpia_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend:/usr/share/nginx/html:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - backend
+      - n8n
+
+volumes:
+  postgres_data:
+  n8n_data:
