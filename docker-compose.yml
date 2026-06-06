@@ -65,3 +65,8 @@ services:
 volumes:
   postgres_data:
   n8n_data:
+
+networks:
+  default:
+    name: ai-stack_hermes_net
+    external: true
