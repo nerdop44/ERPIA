@@ -15,6 +15,7 @@ class Empresa(Base):
     agentes = relationship("Agente", back_populates="empresa", cascade="all, delete-orphan")
     tareas = relationship("TareaKanban", back_populates="empresa", cascade="all, delete-orphan")
     logs = relationship("LogAuditoria", back_populates="empresa", cascade="all, delete-orphan")
+    notas = relationship("Nota", back_populates="empresa", cascade="all, delete-orphan")
 
 
 class ConfiguracionGlobal(Base):
@@ -70,3 +71,39 @@ class LogAuditoria(Base):
 
     empresa = relationship("Empresa", back_populates="logs")
     agente = relationship("Agente", back_populates="logs")
+
+
+class Grupo(Base):
+    __tablename__ = "grupos"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nombre = Column(String(50), unique=True, index=True, nullable=False)
+    permisos = Column(Text, nullable=True)  # Lista en formato JSON
+
+    usuarios = relationship("Usuario", back_populates="grupo", cascade="all, delete-orphan")
+
+
+class Usuario(Base):
+    __tablename__ = "usuarios"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, index=True, nullable=False)
+    hashed_password = Column(String(255), nullable=False)
+    full_name = Column(String(100), nullable=True)
+    activo = Column(Boolean, default=True)
+    grupo_id = Column(Integer, ForeignKey("grupos.id", ondelete="SET NULL"), nullable=True)
+    fecha_creacion = Column(DateTime, default=datetime.datetime.utcnow)
+
+    grupo = relationship("Grupo", back_populates="usuarios")
+
+
+class Nota(Base):
+    __tablename__ = "notas"
+
+    id = Column(Integer, primary_key=True, index=True)
+    empresa_id = Column(Integer, ForeignKey("empresas.id", ondelete="CASCADE"), nullable=False)
+    titulo = Column(String(150), nullable=False)
+    contenido = Column(Text, nullable=True)
+    fecha_actualizacion = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    empresa = relationship("Empresa", back_populates="notas")

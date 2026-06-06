@@ -30,6 +30,20 @@
             
             --font-body: 'Inter', sans-serif;
             --font-mono: 'Fira Code', monospace;
+            
+            --left-width: 260px;
+            --right-width: 360px;
+        }
+
+        body.dark-mode {
+            --bg-light: #121214;
+            --bg-white: #1A1A1E;
+            --text-dark: #F3F4F6;
+            --text-muted: #9CA3AF;
+            --border-color: #2D2D35;
+            --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+            --odoo-primary: #55394E;
+            --odoo-primary-dark: #422C3D;
         }
 
         * {
@@ -46,6 +60,45 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Login Screen */
+        #login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--odoo-primary) 0%, #3a2233 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .login-card {
+            background-color: var(--bg-white);
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 380px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .login-logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--odoo-primary);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .login-logo i {
+            color: var(--odoo-secondary);
         }
 
         /* Odoo Top Navbar */
@@ -68,7 +121,7 @@
         }
 
         .waffle-menu {
-            font-size: 16px;
+            font-size: 18px;
             cursor: pointer;
             padding: 6px;
             border-radius: 4px;
@@ -85,7 +138,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            letter-spacing: 0.5px;
+            cursor: pointer;
         }
 
         .logo i {
@@ -117,11 +170,71 @@
             border-bottom-color: var(--odoo-secondary);
         }
 
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Top bar Dropdowns */
+        .topbar-dropdown {
+            position: relative;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .topbar-dropdown:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            min-width: 180px;
+            z-index: 100;
+            margin-top: 5px;
+            color: var(--text-dark);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 8px 12px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--bg-light);
+        }
+
+        .dropdown-divider {
+            border-top: 1px solid var(--border-color);
+            margin: 4px 0;
+        }
+
         .connection-status {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 12px;
+            font-size: 11px;
             color: rgba(255, 255, 255, 0.9);
             background-color: rgba(255, 255, 255, 0.1);
             padding: 4px 10px;
@@ -145,7 +258,7 @@
             box-shadow: 0 0 6px #EF4444;
         }
 
-        /* Odoo Control Panel (Sub-navbar) */
+        /* Odoo Control Panel */
         .control-panel {
             background-color: var(--bg-white);
             border-bottom: 1px solid var(--border-color);
@@ -154,6 +267,7 @@
             justify-content: space-between;
             align-items: center;
             min-height: 52px;
+            transition: background-color 0.3s, border-color 0.3s;
         }
 
         .breadcrumbs {
@@ -184,7 +298,7 @@
             align-items: center;
         }
 
-        /* Buttons Style Odoo */
+        /* Buttons */
         .btn {
             background-color: var(--odoo-primary);
             color: #FFFFFF;
@@ -210,12 +324,15 @@
         .btn-secondary {
             background-color: var(--bg-white);
             color: var(--odoo-primary);
-            border: 1px solid #CCCCCC;
+            border: 1px solid var(--border-color);
+        }
+
+        body.dark-mode .btn-secondary {
+            color: #FFFFFF;
         }
 
         .btn-secondary:hover {
             background-color: var(--bg-light);
-            border-color: var(--text-muted);
         }
 
         .btn-success {
@@ -228,14 +345,24 @@
             border-color: var(--odoo-secondary-dark);
         }
 
+        .btn-danger {
+            background-color: #DC2626;
+            border-color: #DC2626;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #B91C1C;
+            border-color: #B91C1C;
+        }
+
         .search-filters-bar {
             display: flex;
-            border: 1px solid #CCCCCC;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             background-color: var(--bg-white);
             overflow: hidden;
-            width: 320px;
-            max-width: 100%;
+            width: 280px;
         }
 
         .search-input {
@@ -244,6 +371,8 @@
             font-size: 13px;
             width: 100%;
             outline: none;
+            background-color: transparent;
+            color: var(--text-dark);
         }
 
         .search-icon-btn {
@@ -254,24 +383,55 @@
             cursor: pointer;
         }
 
-        /* 3-Column Workspace Layout */
-        main {
-            display: grid;
-            grid-template-columns: 260px 1fr 360px;
+        /* Layout Framework modules */
+        .module-viewport {
+            flex-grow: 1;
             height: calc(100vh - 98px);
+            overflow: hidden;
+            display: none;
+        }
+
+        .module-viewport.active {
+            display: block;
+        }
+
+        /* Tablero Module Columns Layout */
+        .tablero-layout {
+            display: grid;
+            grid-template-columns: var(--left-width, 260px) 6px 1fr 6px var(--right-width, 360px);
+            height: 100%;
             background-color: var(--bg-light);
+            transition: background-color 0.3s;
         }
 
         .column {
             display: flex;
             flex-direction: column;
-            border-right: 1px solid var(--border-color);
+            background-color: var(--bg-white);
             height: 100%;
             overflow: hidden;
+            transition: background-color 0.3s, border-color 0.3s;
         }
 
-        .column:last-child {
-            border-right: none;
+        .column-border-right {
+            border-right: 1px solid var(--border-color);
+        }
+
+        .column-border-left {
+            border-left: 1px solid var(--border-color);
+        }
+
+        .resize-handle {
+            background-color: transparent;
+            cursor: col-resize;
+            width: 6px;
+            height: 100%;
+            z-index: 5;
+            transition: background-color 0.2s;
+        }
+
+        .resize-handle:hover, .resize-handle.resizing {
+            background-color: var(--odoo-secondary);
         }
 
         .column-header {
@@ -286,6 +446,7 @@
             justify-content: space-between;
             align-items: center;
             background-color: var(--bg-white);
+            transition: background-color 0.3s, border-color 0.3s;
         }
 
         .column-content {
@@ -294,42 +455,7 @@
             flex-grow: 1;
         }
 
-        /* Left Side (Configs / Organization) */
-        .left-col {
-            background-color: var(--bg-white);
-        }
-
-        .company-selector-container {
-            margin-bottom: 20px;
-        }
-
-        label {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-muted);
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-        }
-
-        select, input, textarea {
-            width: 100%;
-            background-color: var(--bg-white);
-            border: 1px solid #CCCCCC;
-            color: var(--text-dark);
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-family: var(--font-body);
-            font-size: 13px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        select:focus, input:focus, textarea:focus {
-            border-color: var(--odoo-primary);
-        }
-
+        /* Configurations Global */
         .config-card {
             background: var(--bg-light);
             border: 1px solid var(--border-color);
@@ -337,6 +463,7 @@
             padding: 10px;
             margin-bottom: 10px;
             position: relative;
+            transition: background-color 0.3s, border-color 0.3s;
         }
 
         .config-card-header {
@@ -379,7 +506,6 @@
             cursor: pointer;
             font-size: 11px;
             opacity: 0.6;
-            transition: opacity 0.2s;
         }
 
         .delete-config-btn:hover {
@@ -394,6 +520,8 @@
             height: 100%;
             padding: 12px;
             overflow-y: auto;
+            background-color: var(--bg-light);
+            transition: background-color 0.3s;
         }
 
         .kanban-lane {
@@ -402,9 +530,14 @@
             display: flex;
             flex-direction: column;
             height: 100%;
-            max-height: 100%;
             overflow: hidden;
             border: 1px solid #D6D6D9;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        body.dark-mode .kanban-lane {
+            background-color: #202025;
+            border-color: #2F2F37;
         }
 
         .lane-header {
@@ -417,6 +550,12 @@
             justify-content: space-between;
             background-color: #F1F1F4;
             border-bottom: 1px solid #D6D6D9;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        body.dark-mode .lane-header {
+            background-color: #1A1A1E;
+            border-bottom-color: #2F2F37;
         }
 
         .lane-count {
@@ -426,6 +565,11 @@
             font-size: 10px;
             color: var(--text-dark);
             font-weight: bold;
+        }
+
+        body.dark-mode .lane-count {
+            background: #3A3A42;
+            color: #FFFFFF;
         }
 
         .lane-cards {
@@ -443,10 +587,13 @@
             border: 1px solid #D3D3D3;
             border-radius: 4px;
             padding: 12px;
-            transition: box-shadow 0.2s, border-color 0.2s;
+            transition: box-shadow 0.2s, border-color 0.2s, background-color 0.3s;
             box-shadow: var(--card-shadow);
             position: relative;
-            cursor: grab;
+        }
+
+        body.dark-mode .card {
+            border-color: #2F2F37;
         }
 
         .card:hover {
@@ -454,7 +601,6 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
-        /* State Indicator Color Bar */
         .card::before {
             content: '';
             position: absolute;
@@ -487,6 +633,10 @@
             font-weight: 600;
             font-size: 13px;
             color: var(--odoo-primary);
+        }
+
+        body.dark-mode .agent-name {
+            color: #00A09D;
         }
 
         .agent-status-badge {
@@ -527,6 +677,7 @@
             padding: 6px 8px;
             font-size: 11px;
             margin-left: 6px;
+            transition: background-color 0.3s, border-color 0.3s;
         }
 
         .task-label {
@@ -567,14 +718,9 @@
 
         .btn-approve-action:hover {
             background-color: var(--odoo-secondary-dark);
-            border-color: var(--odoo-secondary-dark);
         }
 
-        /* Right Side (Odoo Chatter / Event Logs) */
-        .right-col {
-            background-color: var(--bg-white);
-        }
-
+        /* Chatter (Right Side logs) */
         .chatter-container {
             display: flex;
             flex-direction: column;
@@ -588,16 +734,17 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            background-color: #FFFFFF;
+            background-color: var(--bg-white);
+            transition: background-color 0.3s;
         }
 
-        /* Odoo Chatter Message Bubble */
         .chatter-msg {
             display: flex;
             gap: 10px;
             align-items: flex-start;
             padding-bottom: 12px;
-            border-bottom: 1px solid #F3F4F6;
+            border-bottom: 1px solid var(--border-color);
+            transition: border-color 0.3s;
         }
 
         .chatter-avatar {
@@ -642,22 +789,320 @@
 
         .chatter-text {
             font-size: 12px;
-            color: #374151;
+            color: var(--text-dark);
             line-height: 1.4;
             white-space: pre-line;
         }
 
-        .chatter-text.success { color: #047857; font-weight: 500; }
-        .chatter-text.warning { color: #B45309; font-weight: 500; }
-        .chatter-text.error { color: #B91C1C; font-weight: 500; }
+        .chatter-text.success { color: #10B981; font-weight: 500; }
+        .chatter-text.warning { color: #F59E0B; font-weight: 500; }
+        .chatter-text.error { color: #EF4444; font-weight: 500; }
 
         .chatter-composer {
             border-top: 1px solid var(--border-color);
             padding: 12px 15px;
             background-color: var(--bg-light);
+            transition: background-color 0.3s, border-color 0.3s;
         }
 
-        /* Modals style Odoo */
+        /* App Switcher Overlay */
+        #app-switcher {
+            display: none;
+            position: fixed;
+            top: 46px;
+            left: 0;
+            width: 100%;
+            height: calc(100vh - 46px);
+            background-color: rgba(113, 75, 103, 0.95);
+            z-index: 500;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body.dark-mode #app-switcher {
+            background-color: rgba(30, 30, 36, 0.96);
+        }
+
+        .switcher-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 160px);
+            gap: 30px;
+        }
+
+        .switcher-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #FFFFFF;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+
+        .switcher-item:hover {
+            transform: scale(1.1);
+        }
+
+        .switcher-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            background-color: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transition: background 0.2s;
+        }
+
+        .switcher-item:hover .switcher-icon {
+            background-color: rgba(255, 255, 255, 0.35);
+        }
+
+        .switcher-label {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Settings View Layout */
+        .settings-layout {
+            display: flex;
+            height: 100%;
+        }
+
+        .settings-sidebar {
+            width: 220px;
+            background-color: var(--bg-white);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 10px 0;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .settings-menu-item {
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-dark);
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .settings-menu-item:hover, .settings-menu-item.active {
+            background-color: var(--bg-light);
+            color: var(--odoo-primary);
+            border-left-color: var(--odoo-primary);
+        }
+
+        body.dark-mode .settings-menu-item:hover, body.dark-mode .settings-menu-item.active {
+            color: var(--odoo-secondary);
+            border-left-color: var(--odoo-secondary);
+        }
+
+        .settings-content {
+            flex-grow: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background-color: var(--bg-light);
+            transition: background-color 0.3s;
+        }
+
+        .settings-section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--odoo-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        body.dark-mode .settings-section-title {
+            color: var(--odoo-secondary);
+        }
+
+        .crud-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background-color: var(--bg-white);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .crud-table th, .crud-table td {
+            padding: 10px 15px;
+            text-align: left;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .crud-table th {
+            background-color: var(--bg-light);
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        .crud-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Obsidian Wiki Layout */
+        .wiki-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            height: 100%;
+        }
+
+        .wiki-sidebar {
+            background-color: var(--bg-white);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .wiki-notes-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .wiki-note-item {
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-dark);
+            transition: background 0.2s;
+        }
+
+        .wiki-note-item:hover, .wiki-note-item.active {
+            background-color: var(--bg-light);
+            color: var(--odoo-primary);
+            font-weight: 500;
+        }
+
+        body.dark-mode .wiki-note-item:hover, body.dark-mode .wiki-note-item.active {
+            color: var(--odoo-secondary);
+        }
+
+        .graph-view-container {
+            border-top: 1px solid var(--border-color);
+            padding: 10px;
+            height: 250px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        #graph-canvas {
+            flex-grow: 1;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-light);
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            cursor: crosshair;
+        }
+
+        .wiki-workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            background-color: var(--bg-light);
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .wiki-editor-pane, .wiki-preview-pane {
+            background-color: var(--bg-white);
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .wiki-editor-textarea {
+            flex-grow: 1;
+            width: 100%;
+            border: none;
+            padding: 15px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            resize: none;
+            outline: none;
+            background-color: transparent;
+            color: var(--text-dark);
+        }
+
+        .wiki-preview-content {
+            padding: 20px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-dark);
+        }
+
+        .wiki-preview-content h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--odoo-primary);
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 4px;
+        }
+
+        body.dark-mode .wiki-preview-content h1 {
+            color: var(--odoo-secondary);
+        }
+
+        .wiki-preview-content h2 {
+            font-size: 16px;
+            margin-top: 15px;
+            margin-bottom: 8px;
+        }
+
+        .wiki-preview-content p {
+            margin-bottom: 10px;
+        }
+
+        .wiki-preview-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .wiki-preview-content a.wiki-link {
+            color: var(--odoo-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px dashed var(--odoo-secondary);
+        }
+
+        .wiki-preview-content a.wiki-link:hover {
+            color: var(--odoo-secondary-dark);
+            border-bottom-style: solid;
+        }
+
+        /* Modals style */
         .modal {
             display: none;
             position: fixed;
@@ -679,6 +1124,7 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
             animation: modalFade 0.25s ease-out;
             overflow: hidden;
+            color: var(--text-dark);
         }
 
         @keyframes modalFade {
@@ -698,7 +1144,6 @@
         .modal-title {
             font-size: 15px;
             font-weight: 600;
-            color: var(--text-dark);
         }
 
         .close-modal {
@@ -725,152 +1170,330 @@
         .form-group {
             margin-bottom: 12px;
         }
+
+        .form-group label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-color);
+            color: var(--text-dark);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-family: var(--font-body);
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        select:focus, input:focus, textarea:focus {
+            border-color: var(--odoo-primary);
+        }
     </style>
 </head>
 <body>
 
-    <!-- Odoo Navbar -->
-    <header>
-        <div class="navbar-left">
-            <i class="fa-solid fa-bars waffle-menu"></i>
-            <div class="logo">
+    <!-- Login Overlay Screen -->
+    <div id="login-screen">
+        <div class="login-card">
+            <div class="login-logo">
                 <i class="fa-solid fa-brain"></i>
-                <span>ERPIA</span>
+                <span>ERPIA Enterprise</span>
             </div>
-            <nav class="navbar-menu">
-                <a class="navbar-item active"><i class="fa-solid fa-table-columns" style="margin-right:6px;"></i>Tablero</a>
-                <a class="navbar-item" onclick="openModal('modal-company')"><i class="fa-solid fa-building" style="margin-right:6px;"></i>Empresas</a>
-            </nav>
+            <div style="margin-bottom: 20px; text-align: left;">
+                <div class="form-group">
+                    <label for="login-username">Usuario</label>
+                    <input type="text" id="login-username" placeholder="admin / operador" value="admin">
+                </div>
+                <div class="form-group" style="margin-top:10px;">
+                    <label for="login-password">Contraseña</label>
+                    <input type="password" id="login-password" placeholder="admin123 / op123" value="admin123">
+                </div>
+            </div>
+            <button class="btn" style="width: 100%; padding: 10px;" onclick="handleLogin()">
+                Iniciar Sesión
+            </button>
+            <div id="login-error" style="color: #EF4444; font-size: 12px; margin-top: 12px; display: none;"></div>
         </div>
-        <div class="connection-status">
-            <span id="ws-dot" class="status-dot disconnected"></span>
-            <span id="ws-text">Canal en Vivo</span>
-        </div>
-    </header>
+    </div>
 
-    <!-- Odoo Control Panel -->
-    <div class="control-panel">
-        <div class="breadcrumbs">
-            <span class="breadcrumb-item">Mesa de Control</span>
-            <span class="breadcrumb-separator">/</span>
-            <span class="breadcrumb-item active" id="active-company-breadcrumb">VenridesCafé</span>
+    <!-- Main Application Wrapper -->
+    <div id="app-wrapper" style="display: none; flex-direction: column; height: 100%;">
+        <!-- Odoo Navbar -->
+        <header>
+            <div class="navbar-left">
+                <i class="fa-solid fa-bars waffle-menu" onclick="toggleAppSwitcher()"></i>
+                <div class="logo" onclick="switchModule('tablero')">
+                    <i class="fa-solid fa-brain"></i>
+                    <span>ERPIA</span>
+                </div>
+                <nav class="navbar-menu">
+                    <a class="navbar-item active" id="nav-tablero" onclick="switchModule('tablero')">
+                        <i class="fa-solid fa-table-columns" style="margin-right:6px;"></i>Tablero
+                    </a>
+                    <a class="navbar-item" id="nav-wiki" onclick="switchModule('wiki')">
+                        <i class="fa-solid fa-book-open" style="margin-right:6px;"></i>Obsidian Wiki
+                    </a>
+                </nav>
+            </div>
+            
+            <div class="navbar-right">
+                <div class="connection-status">
+                    <span id="ws-dot" class="status-dot disconnected"></span>
+                    <span id="ws-text">Canal en Vivo</span>
+                </div>
+                
+                <!-- Odoo Company Selector -->
+                <div class="topbar-dropdown" onclick="toggleDropdown('company-dropdown')">
+                    <i class="fa-solid fa-building"></i>
+                    <span id="header-company-name">Cargando...</span>
+                    <i class="fa-solid fa-chevron-down" style="font-size:10px;"></i>
+                    <div class="dropdown-menu" id="company-dropdown">
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
+
+                <!-- User Dropdown Menu -->
+                <div class="topbar-dropdown" onclick="toggleDropdown('user-dropdown')">
+                    <div class="chatter-avatar" style="width:24px; height:24px; font-size:10px; background-color: var(--odoo-secondary);" id="user-avatar-initials">AD</div>
+                    <span id="header-user-fullname">Admin</span>
+                    <i class="fa-solid fa-chevron-down" style="font-size:10px;"></i>
+                    <div class="dropdown-menu" id="user-dropdown">
+                        <div class="dropdown-item" style="font-weight: 600;" id="user-info-text">Administrador</div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-item" onclick="switchModule('ajustes')">
+                            <i class="fa-solid fa-sliders"></i> Ajustes del Sistema
+                        </div>
+                        <div class="dropdown-item" onclick="toggleDarkMode(); event.stopPropagation();">
+                            <i class="fa-solid fa-moon"></i> Modo Oscuro
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-item" onclick="handleLogout()" style="color: #EF4444;">
+                            <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Odoo Control Panel -->
+        <div class="control-panel">
+            <div class="breadcrumbs">
+                <span class="breadcrumb-item">Mesa de Control</span>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-item active" id="active-company-breadcrumb">VenridesCafé</span>
+            </div>
+            <div class="control-panel-actions">
+                <div id="tablero-actions" class="view-actions">
+                    <button class="btn" onclick="openModal('modal-task')">
+                        <i class="fa-solid fa-plus"></i> Nueva Tarea
+                    </button>
+                    <button class="btn btn-secondary" onclick="syncOdoo()">
+                        <i class="fa-solid fa-arrows-rotate"></i> Sincronizar Odoo
+                    </button>
+                </div>
+                
+                <div id="wiki-actions" class="view-actions" style="display:none;">
+                    <button class="btn" onclick="createNewWikiNote()">
+                        <i class="fa-solid fa-plus"></i> Nueva Nota Wiki
+                    </button>
+                    <button class="btn btn-success" onclick="saveWikiNote()">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar Nota
+                    </button>
+                </div>
+                
+                <div id="ajustes-actions" class="view-actions" style="display:none;">
+                    <button class="btn" id="btn-ajustes-create" onclick="openAjustesCreateModal()">
+                        <i class="fa-solid fa-plus"></i> Crear Registro
+                    </button>
+                </div>
+
+                <div class="search-filters-bar">
+                    <input type="text" class="search-input" id="search-bar" placeholder="Buscar..." onkeyup="handleGlobalSearch()">
+                    <button class="search-icon-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </div>
+            </div>
         </div>
-        <div class="control-panel-actions">
-            <button class="btn" onclick="openModal('modal-task')">
-                <i class="fa-solid fa-plus"></i> Nueva Tarea
-            </button>
-            <button class="btn btn-secondary" onclick="syncOdoo()">
-                <i class="fa-solid fa-arrows-rotate"></i> Sincronizar Odoo
-            </button>
-            <div class="search-filters-bar">
-                <input type="text" class="search-input" id="kanban-search" placeholder="Buscar agentes o tareas..." onkeyup="filterKanban()">
-                <button class="search-icon-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
+
+        <!-- MODULE VIEWPORTS -->
+
+        <!-- 1. Tablero Dashboard Module Viewport -->
+        <div id="module-tablero" class="module-viewport active">
+            <div class="tablero-layout">
+                <!-- Left Column: Configs & Settings -->
+                <section class="column column-border-right" id="left-sidebar">
+                    <div class="column-header">
+                        <span>Configuraciones de Entorno</span>
+                        <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="openModal('modal-config')">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="column-content">
+                        <div id="configs-container">
+                            <!-- Filled dynamically -->
+                        </div>
+                        <div style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                            <button class="btn btn-secondary" style="width:100%;" onclick="openModal('modal-agent')">
+                                <i class="fa-solid fa-robot"></i> Registrar Agente
+                            </button>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Left Resize Handle -->
+                <div class="resize-handle" id="left-handle"></div>
+                
+                <!-- Center Column: Odoo Kanban Board -->
+                <section class="column" id="center-content">
+                    <div class="column-header" style="background-color: var(--bg-light);">
+                        <span>Tablero Kanban de Agentes</span>
+                        <span id="active-company-name" style="font-weight: 600; color: var(--odoo-primary);">VenridesCafé</span>
+                    </div>
+                    
+                    <div class="kanban-board">
+                        <!-- Lane 0: En Suspenso -->
+                        <div class="kanban-lane">
+                            <div class="lane-header">
+                                <span>En Suspenso</span>
+                                <span class="lane-count" id="count-idle">0</span>
+                            </div>
+                            <div class="lane-cards" id="lane-idle"></div>
+                        </div>
+
+                        <!-- Lane 1: Trabajando -->
+                        <div class="kanban-lane">
+                            <div class="lane-header">
+                                <span>Trabajando</span>
+                                <span class="lane-count" id="count-working">0</span>
+                            </div>
+                            <div class="lane-cards" id="lane-working"></div>
+                        </div>
+
+                        <!-- Lane 2: Aprobación Humana -->
+                        <div class="kanban-lane">
+                            <div class="lane-header">
+                                <span>Aprobación</span>
+                                <span class="lane-count" id="count-approval">0</span>
+                            </div>
+                            <div class="lane-cards" id="lane-approval"></div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Right Resize Handle -->
+                <div class="resize-handle" id="right-handle"></div>
+                
+                <!-- Right Column: Odoo Chatter (Logs & Auditoria) -->
+                <section class="column column-border-left" id="right-sidebar">
+                    <div class="column-header">
+                        <span>Registro de Actividades (Chatter)</span>
+                        <button class="btn btn-secondary" style="padding: 2px 6px; font-size: 11px;" onclick="clearLogs()">
+                            Limpiar
+                        </button>
+                    </div>
+                    <div class="chatter-container">
+                        <div class="chatter-feed" id="logs-container"></div>
+                        <div class="chatter-composer">
+                            <div style="font-size: 10px; color: var(--text-muted); font-family: var(--font-mono);">
+                                $ listenerws --host erpia.venrides.com
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- 2. Obsidian Wiki Module Viewport -->
+        <div id="module-wiki" class="module-viewport">
+            <div class="wiki-layout">
+                <!-- Left Wiki Sidebar: List of notes & Graph View -->
+                <div class="wiki-sidebar">
+                    <div class="column-header">
+                        <span>Notas Wiki (Obsidian)</span>
+                    </div>
+                    <div class="wiki-notes-list" id="wiki-notes-list-container">
+                        <!-- Note list items filled dynamically -->
+                    </div>
+                    
+                    <!-- Interactive Graph View -->
+                    <div class="graph-view-container">
+                        <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px;">GRAPH VIEW DE CONEXIONES</div>
+                        <canvas id="graph-canvas"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Right Wiki Workspace: Editor & Previewer side-by-side -->
+                <div class="wiki-workspace">
+                    <div class="wiki-editor-pane">
+                        <div class="column-header" style="border-bottom: 1px solid var(--border-color);">
+                            <input type="text" id="wiki-note-title-input" placeholder="Título de la Nota" style="border:none; font-weight:600; font-size:14px; background:transparent;">
+                        </div>
+                        <textarea class="wiki-editor-textarea" id="wiki-note-editor-textarea" placeholder="Escribe tu nota en Markdown aquí... Usa [[Nombre de Nota]] para conectar con otras notas." oninput="updateWikiPreview()"></textarea>
+                    </div>
+                    
+                    <div class="wiki-preview-pane">
+                        <div class="column-header">
+                            <span>Previsualización (Renderizado)</span>
+                        </div>
+                        <div class="wiki-preview-content" id="wiki-preview-content-container">
+                            <!-- Processed markdown html shown here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Ajustes Module Viewport -->
+        <div id="module-ajustes" class="module-viewport">
+            <div class="settings-layout">
+                <div class="settings-sidebar">
+                    <div class="settings-menu-item active" id="menu-users" onclick="switchSettingsPanel('users')">
+                        <i class="fa-solid fa-user-group" style="margin-right:10px;"></i>Usuarios
+                    </div>
+                    <div class="settings-menu-item" id="menu-groups" onclick="switchSettingsPanel('groups')">
+                        <i class="fa-solid fa-users-gear" style="margin-right:10px;"></i>Grupos
+                    </div>
+                    <div class="settings-menu-item" id="menu-companies" onclick="switchSettingsPanel('companies')">
+                        <i class="fa-solid fa-building" style="margin-right:10px;"></i>Empresas
+                    </div>
+                </div>
+                <div class="settings-content">
+                    <!-- Dynamic adjustments panel container -->
+                    <div id="settings-panel-container">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- App Switcher overlay screen -->
+        <div id="app-switcher" onclick="toggleAppSwitcher()">
+            <div class="switcher-grid" onclick="event.stopPropagation()">
+                <div class="switcher-item" onclick="switchModule('tablero')">
+                    <div class="switcher-icon" style="background-color: #00A09D;"><i class="fa-solid fa-table-columns"></i></div>
+                    <span class="switcher-label">Tablero</span>
+                </div>
+                <div class="switcher-item" onclick="switchModule('wiki')">
+                    <div class="switcher-icon" style="background-color: #24292e;"><i class="fa-solid fa-book-open"></i></div>
+                    <span class="switcher-label">Obsidian Wiki</span>
+                </div>
+                <div class="switcher-item" onclick="switchModule('ajustes')">
+                    <div class="switcher-icon" style="background-color: #6c757d;"><i class="fa-solid fa-sliders"></i></div>
+                    <span class="switcher-label">Ajustes</span>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- 3-Column Workspace -->
-    <main>
-        
-        <!-- Left Column: Configs & Settings -->
-        <section class="column left-col">
-            <div class="column-header">
-                <span>Configuración Global</span>
-                <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="openModal('modal-config')">
-                    <i class="fa-solid fa-plus"></i>
-                </button>
-            </div>
-            <div class="column-content">
-                <div class="company-selector-container">
-                    <label for="company-select">Empresa Activa</label>
-                    <select id="company-select" onchange="onCompanyChange()">
-                    </select>
-                </div>
-                
-                <label>Configuraciones de Entorno</label>
-                <div id="configs-container" style="margin-top: 5px;">
-                </div>
-                
-                <div style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px;">
-                    <button class="btn btn-secondary" style="width:100%;" onclick="openModal('modal-agent')">
-                        <i class="fa-solid fa-robot"></i> Registrar Agente
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Center Column: Odoo Kanban Board -->
-        <section class="column">
-            <div class="column-header" style="background-color: var(--bg-light);">
-                <span>Tablero Kanban de Agentes</span>
-                <span id="active-company-name" style="font-weight: 600; color: var(--odoo-primary);">VenridesCafé</span>
-            </div>
-            
-            <div class="kanban-board">
-                
-                <!-- Lane 0: En Suspenso -->
-                <div class="kanban-lane">
-                    <div class="lane-header">
-                        <span>En Suspenso</span>
-                        <span class="lane-count" id="count-idle">0</span>
-                    </div>
-                    <div class="lane-cards" id="lane-idle">
-                    </div>
-                </div>
-
-                <!-- Lane 1: Trabajando -->
-                <div class="kanban-lane">
-                    <div class="lane-header">
-                        <span>Trabajando</span>
-                        <span class="lane-count" id="count-working">0</span>
-                    </div>
-                    <div class="lane-cards" id="lane-working">
-                    </div>
-                </div>
-
-                <!-- Lane 2: Aprobación Humana -->
-                <div class="kanban-lane">
-                    <div class="lane-header">
-                        <span>Aprobación</span>
-                        <span class="lane-count" id="count-approval">0</span>
-                    </div>
-                    <div class="lane-cards" id="lane-approval">
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- Right Column: Odoo Chatter (Logs & Auditoria) -->
-        <section class="column right-col">
-            <div class="column-header">
-                <span>Registro de Actividades (Chatter)</span>
-                <button class="btn btn-secondary" style="padding: 2px 6px; font-size: 11px;" onclick="clearLogs()">
-                    Limpiar
-                </button>
-            </div>
-            <div class="chatter-container">
-                <div class="chatter-feed" id="logs-container">
-                    <div class="chatter-msg">
-                        <div class="chatter-avatar system"><i class="fa-solid fa-gears"></i></div>
-                        <div class="chatter-msg-body">
-                            <div class="chatter-msg-header">
-                                <span class="chatter-author">Sistema ERPIA</span>
-                                <span class="chatter-time">Ahora</span>
-                            </div>
-                            <div class="chatter-text">Canal de auditoría global listo.</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="chatter-composer">
-                    <div style="font-size: 10px; color: var(--text-muted); font-family: var(--font-mono);">
-                        $ listenerws --host erpia.venrides.com
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </main>
+    <!-- Modals -->
 
     <!-- Modal Registrar Empresa -->
     <div id="modal-company" class="modal">
@@ -910,8 +1533,7 @@
                 </div>
                 <div class="form-group">
                     <label for="task-agent-select">Asignar al Agente</label>
-                    <select id="task-agent-select">
-                    </select>
+                    <select id="task-agent-select"></select>
                 </div>
             </div>
             <div class="modal-footer">
@@ -978,6 +1600,62 @@
         </div>
     </div>
 
+    <!-- Modal Ajustes: Crear Usuario -->
+    <div id="modal-ajustes-user" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Registrar Nuevo Usuario</span>
+                <button class="close-modal" onclick="closeModal('modal-ajustes-user')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="user-username-input">Usuario (Username)</label>
+                    <input type="text" id="user-username-input" placeholder="Ej: operador2">
+                </div>
+                <div class="form-group">
+                    <label for="user-fullname-input">Nombre Completo</label>
+                    <input type="text" id="user-fullname-input" placeholder="Ej: Juan Pérez">
+                </div>
+                <div class="form-group">
+                    <label for="user-password-input">Contraseña</label>
+                    <input type="password" id="user-password-input" placeholder="Contraseña">
+                </div>
+                <div class="form-group">
+                    <label for="user-group-select">Grupo / Rol</label>
+                    <select id="user-group-select"></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-ajustes-user')">Descartar</button>
+                <button class="btn" onclick="submitCreateUser()">Crear Usuario</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ajustes: Crear Grupo -->
+    <div id="modal-ajustes-group" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Crear Nuevo Grupo</span>
+                <button class="close-modal" onclick="closeModal('modal-ajustes-group')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="group-name-input">Nombre del Grupo</label>
+                    <input type="text" id="group-name-input" placeholder="Ej: Supervisores">
+                </div>
+                <div class="form-group">
+                    <label for="group-permissions-input">Permisos (Formato JSON array)</label>
+                    <input type="text" id="group-permissions-input" value='["read", "write"]'>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-ajustes-group')">Descartar</button>
+                <button class="btn" onclick="submitCreateGroup()">Crear Grupo</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         const apiBaseUrl = isLocalhost ? 'http://localhost:8000' : `${window.location.protocol}//${window.location.host}`;
@@ -986,17 +1664,171 @@
         let selectedCompanyId = null;
         let wsConnection = null;
         let cachedAgents = [];
+        let activeModule = 'tablero';
+        let activeSettingsPanel = 'users';
+        
+        // Wiki notes management
+        let wikiNotes = [];
+        let activeNote = null;
+
+        // Session
+        let userToken = localStorage.getItem('erpia-token') || null;
 
         window.addEventListener('DOMContentLoaded', async () => {
-            await loadCompanies();
-            initWebSocket();
+            initResizableSidebars();
+            if (localStorage.getItem('erpia-darkmode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+            }
+            
+            if (userToken) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app-wrapper').style.display = 'flex';
+                await loadSessionUser();
+                await loadCompanies();
+                initWebSocket();
+            }
         });
 
+        // 1. Resizable sidebars
+        function initResizableSidebars() {
+            const leftHandle = document.getElementById('left-handle');
+            const rightHandle = document.getElementById('right-handle');
+            const rootElement = document.documentElement;
+
+            let isResizingLeft = false;
+            let isResizingRight = false;
+
+            const savedLeftWidth = localStorage.getItem('erpia-left-width') || '260px';
+            const savedRightWidth = localStorage.getItem('erpia-right-width') || '360px';
+            rootElement.style.setProperty('--left-width', savedLeftWidth);
+            rootElement.style.setProperty('--right-width', savedRightWidth);
+
+            leftHandle.addEventListener('mousedown', (e) => {
+                isResizingLeft = true;
+                leftHandle.classList.add('resizing');
+                document.body.style.cursor = 'col-resize';
+                e.preventDefault();
+            });
+
+            rightHandle.addEventListener('mousedown', (e) => {
+                isResizingRight = true;
+                rightHandle.classList.add('resizing');
+                document.body.style.cursor = 'col-resize';
+                e.preventDefault();
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (isResizingLeft) {
+                    const newWidth = Math.max(180, Math.min(500, e.clientX)) + 'px';
+                    rootElement.style.setProperty('--left-width', newWidth);
+                    localStorage.setItem('erpia-left-width', newWidth);
+                } else if (isResizingRight) {
+                    const newWidth = Math.max(200, Math.min(600, window.innerWidth - e.clientX)) + 'px';
+                    rootElement.style.setProperty('--right-width', newWidth);
+                    localStorage.setItem('erpia-right-width', newWidth);
+                }
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (isResizingLeft) {
+                    isResizingLeft = false;
+                    leftHandle.classList.remove('resizing');
+                }
+                if (isResizingRight) {
+                    isResizingRight = false;
+                    rightHandle.classList.remove('resizing');
+                }
+                document.body.style.cursor = 'default';
+            });
+        }
+
+        // 2. Auth Flow
+        async function handleLogin() {
+            const userIn = document.getElementById('login-username').value.trim();
+            const passIn = document.getElementById('login-password').value.trim();
+            const errDiv = document.getElementById('login-error');
+            errDiv.style.display = 'none';
+
+            if (!userIn || !passIn) return;
+
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: userIn, password: passIn })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    localStorage.setItem('erpia-token', data.token);
+                    localStorage.setItem('erpia-username', data.usuario.username);
+                    localStorage.setItem('erpia-fullname', data.usuario.full_name || data.usuario.username);
+                    userToken = data.token;
+                    
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('app-wrapper').style.display = 'flex';
+                    
+                    await loadSessionUser();
+                    await loadCompanies();
+                    initWebSocket();
+                } else {
+                    const err = await res.json();
+                    errDiv.innerText = err.detail || 'Fallo de autenticación.';
+                    errDiv.style.display = 'block';
+                }
+            } catch (err) {
+                console.error(err);
+                errDiv.innerText = 'Error al conectar con el backend.';
+                errDiv.style.display = 'block';
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('erpia-token');
+            localStorage.removeItem('erpia-username');
+            localStorage.removeItem('erpia-fullname');
+            window.location.reload();
+        }
+
+        async function loadSessionUser() {
+            const username = localStorage.getItem('erpia-username') || 'admin';
+            const fullname = localStorage.getItem('erpia-fullname') || 'Admin';
+            
+            document.getElementById('header-user-fullname').innerText = fullname;
+            document.getElementById('user-avatar-initials').innerText = username.substring(0,2).toUpperCase();
+            document.getElementById('user-info-text').innerText = `${fullname} (@${username})`;
+        }
+
+        function toggleDarkMode() {
+            const hasDark = document.body.classList.toggle('dark-mode');
+            if (hasDark) {
+                localStorage.setItem('erpia-darkmode', 'enabled');
+            } else {
+                localStorage.setItem('erpia-darkmode', 'disabled');
+            }
+        }
+
+        function toggleDropdown(id) {
+            // Close other dropdowns first
+            const dropdowns = document.querySelectorAll('.dropdown-menu');
+            dropdowns.forEach(d => {
+                if (d.id !== id) d.classList.remove('show');
+            });
+            document.getElementById(id).classList.toggle('show');
+        }
+
+        // Close dropdowns on outer click
+        window.addEventListener('click', function(e) {
+            if (!e.target.closest('.topbar-dropdown')) {
+                document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show'));
+            }
+        });
+
+        // 3. WebSockets
         function initWebSocket() {
             const wsDot = document.getElementById('ws-dot');
             const wsText = document.getElementById('ws-text');
 
-            console.log("Conectando a WebSocket:", wsBaseUrl);
             wsConnection = new WebSocket(wsBaseUrl);
 
             wsConnection.onopen = () => {
@@ -1007,105 +1839,89 @@
 
             wsConnection.onmessage = (event) => {
                 const message = JSON.parse(event.data);
-                console.log("Mensaje de WebSocket recibido:", message);
                 handleWebSocketMessage(message);
             };
 
             wsConnection.onclose = () => {
                 wsDot.className = 'status-dot disconnected';
-                wsText.innerText = 'Desconectado - Reconectando...';
-                addSystemLog('[SISTEMA] Canal WebSocket desconectado. Reintentando en 5s...', 'error');
+                wsText.innerText = 'Desconectado';
+                addSystemLog('[SISTEMA] Conexión WebSocket perdida. Reconectando en 5s...', 'error');
                 setTimeout(initWebSocket, 5000);
-            };
-
-            wsConnection.onerror = (err) => {
-                console.error("Error en WebSocket:", err);
-                wsConnection.close();
             };
         }
 
         function handleWebSocketMessage(message) {
             const { type, data } = message;
-
             if (type === 'nuevo_log') {
-                if (data.empresa_id === selectedCompanyId) {
-                    appendLogLine(data);
-                }
-            } else if (type === 'agente_status_update' || type === 'agente_creado') {
+                if (data.empresa_id === selectedCompanyId) appendLogLine(data);
+            } else if (['agente_status_update', 'agente_creado', 'tarea_creada', 'tarea_status_update'].includes(type)) {
                 if (data.empresa_id === selectedCompanyId) {
                     loadAgentsAndTasks();
-                }
-            } else if (type === 'tarea_creada' || type === 'tarea_status_update') {
-                if (data.empresa_id === selectedCompanyId) {
-                    loadAgentsAndTasks();
+                    if (activeModule === 'wiki') loadWikiNotesAndBuildGraph(); // update wiki graph in case agent changes
                 }
             }
         }
 
+        // 4. Data Loaders
         async function loadCompanies() {
             try {
                 const res = await fetch(`${apiBaseUrl}/api/empresas`);
                 const companies = await res.json();
                 
-                const select = document.getElementById('company-select');
-                select.innerHTML = '';
+                const dropdown = document.getElementById('company-dropdown');
+                dropdown.innerHTML = '';
 
                 if (companies.length === 0) {
-                    await createDefaultCompany();
+                    // Create default company
+                    const postRes = await fetch(`${apiBaseUrl}/api/empresas`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ nombre: 'VenridesCafé', activo: true })
+                    });
+                    if (postRes.ok) await loadCompanies();
                     return;
                 }
 
                 companies.forEach(company => {
-                    const option = document.createElement('option');
-                    option.value = company.id;
-                    option.innerText = company.nombre;
-                    select.appendChild(option);
+                    const item = document.createElement('div');
+                    item.className = 'dropdown-item';
+                    item.innerHTML = `
+                        <i class="fa-solid ${company.id === selectedCompanyId ? 'fa-check' : 'fa-building'}" style="width:14px;"></i>
+                        <span>${company.nombre}</span>
+                    `;
+                    item.onclick = () => selectCompany(company.id, company.nombre);
+                    dropdown.appendChild(item);
                 });
 
                 if (!selectedCompanyId) {
                     selectedCompanyId = companies[0].id;
                 }
-                select.value = selectedCompanyId;
                 
-                const activeName = select.options[select.selectedIndex].text;
-                document.getElementById('active-company-name').innerText = activeName;
-                document.getElementById('active-company-breadcrumb').innerText = activeName;
+                const activeComp = companies.find(c => c.id === selectedCompanyId) || companies[0];
+                selectedCompanyId = activeComp.id;
                 
+                document.getElementById('header-company-name').innerText = activeComp.nombre;
+                document.getElementById('active-company-name').innerText = activeComp.nombre;
+                document.getElementById('active-company-breadcrumb').innerText = activeComp.nombre;
+
                 await loadConfigs();
                 await loadAgentsAndTasks();
                 await loadLogs();
-            } catch (err) {
-                console.error("Error cargando empresas:", err);
-                addSystemLog('Error de comunicación con el servidor API.', 'error');
-            }
-        }
-
-        async function createDefaultCompany() {
-            try {
-                const res = await fetch(`${apiBaseUrl}/api/empresas`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nombre: 'VenridesCafé', activo: true })
-                });
-                if (res.ok) {
-                    await loadCompanies();
+                
+                // If on wiki, load notes
+                if (activeModule === 'wiki') {
+                    await loadWikiNotesAndBuildGraph();
+                } else if (activeModule === 'ajustes') {
+                    await loadSettingsPanelData();
                 }
             } catch (err) {
-                console.error("Error creando empresa por defecto:", err);
+                console.error(err);
             }
         }
 
-        async function onCompanyChange() {
-            const select = document.getElementById('company-select');
-            selectedCompanyId = parseInt(select.value);
-            
-            const activeName = select.options[select.selectedIndex].text;
-            document.getElementById('active-company-name').innerText = activeName;
-            document.getElementById('active-company-breadcrumb').innerText = activeName;
-            
-            await loadConfigs();
-            await loadAgentsAndTasks();
-            await loadLogs();
+        async function selectCompany(id, nombre) {
+            selectedCompanyId = id;
+            await loadCompanies();
         }
 
         async function loadConfigs() {
@@ -1117,7 +1933,7 @@
                 container.innerHTML = '';
                 
                 if (configs.length === 0) {
-                    container.innerHTML = '<div style="font-size:12px; color:var(--text-muted); padding:5px;">Sin configuraciones globales.</div>';
+                    container.innerHTML = '<div style="font-size:12px; color:var(--text-muted); padding:5px;">Sin configuraciones.</div>';
                     return;
                 }
 
@@ -1137,7 +1953,7 @@
                     container.appendChild(card);
                 });
             } catch (err) {
-                console.error("Error cargando configs:", err);
+                console.error(err);
             }
         }
 
@@ -1149,7 +1965,7 @@
                 const resTasks = await fetch(`${apiBaseUrl}/api/empresas/${selectedCompanyId}/tareas`);
                 const tasks = await resTasks.json();
 
-                // Populate modal agents select
+                // Populate modal select
                 const modalSelect = document.getElementById('task-agent-select');
                 modalSelect.innerHTML = '<option value="">Sin Asignar</option>';
                 cachedAgents.forEach(agent => {
@@ -1167,12 +1983,11 @@
                 laneWorking.innerHTML = '';
                 laneApproval.innerHTML = '';
 
-                let countIdle = 0;
-                let countWorking = 0;
-                let countApproval = 0;
+                let countIdle = 0, countWorking = 0, countApproval = 0;
 
                 cachedAgents.forEach(agent => {
                     const card = document.createElement('div');
+                    card.className = 'card';
                     
                     let activeTaskHtml = `
                         <div class="agent-task-box">
@@ -1207,7 +2022,7 @@
                         statusClass = 'badge-approval';
                         
                         const title = approvalTask ? approvalTask.titulo : (agent.tarea_actual || "Acción Crítica");
-                        const desc = approvalTask ? approvalTask.descripcion : "Se requiere autorización para proceder.";
+                        const desc = approvalTask ? approvalTask.descripcion : "Se requiere autorización.";
                         
                         activeTaskHtml = `
                             <div class="agent-task-box" style="border-color:#FCD34D;">
@@ -1248,9 +2063,8 @@
                 document.getElementById('count-idle').innerText = countIdle;
                 document.getElementById('count-working').innerText = countWorking;
                 document.getElementById('count-approval').innerText = countApproval;
-
             } catch (err) {
-                console.error("Error cargando Kanban:", err);
+                console.error(err);
             }
         }
 
@@ -1260,23 +2074,21 @@
             try {
                 const res = await fetch(`${apiBaseUrl}/api/empresas/${selectedCompanyId}/logs`);
                 const logs = await res.json();
-                logs.forEach(log => {
-                    appendLogLine(log);
-                });
+                logs.forEach(log => appendLogLine(log));
             } catch (err) {
-                console.error("Error cargando logs:", err);
+                console.error(err);
             }
         }
 
         function appendLogLine(log) {
             const container = document.getElementById('logs-container');
+            if (!container) return;
             const msg = document.createElement('div');
             msg.className = 'chatter-msg';
 
             const date = new Date(log.timestamp);
             const timeStr = date.toLocaleTimeString();
 
-            // Find matching agent
             let authorName = 'Sistema ERPIA';
             let isSystem = true;
             let initial = 'S';
@@ -1291,13 +2103,9 @@
             }
 
             let textClass = '';
-            if (log.mensaje.includes('[ÉXITO]')) {
-                textClass = 'success';
-            } else if (log.mensaje.includes('[ATENCIÓN]') || log.mensaje.includes('espera')) {
-                textClass = 'warning';
-            } else if (log.mensaje.includes('[ERROR]')) {
-                textClass = 'error';
-            }
+            if (log.mensaje.includes('[ÉXITO]')) textClass = 'success';
+            else if (log.mensaje.includes('[ATENCIÓN]') || log.mensaje.includes('espera')) textClass = 'warning';
+            else if (log.mensaje.includes('[ERROR]')) textClass = 'error';
 
             msg.innerHTML = `
                 <div class="chatter-avatar ${isSystem ? 'system' : ''}">
@@ -1318,6 +2126,7 @@
 
         function addSystemLog(text, type = '') {
             const container = document.getElementById('logs-container');
+            if (!container) return;
             const msg = document.createElement('div');
             msg.className = 'chatter-msg';
             msg.innerHTML = `
@@ -1334,29 +2143,25 @@
             container.scrollTop = container.scrollHeight;
         }
 
+        // 5. Actions / Submissions
         async function submitCompany() {
-            const input = document.getElementById('company-name-input');
-            const nombre = input.value.trim();
-            if (!nombre) return;
-
+            const name = document.getElementById('company-name-input').value.trim();
+            if (!name) return;
             try {
                 const res = await fetch(`${apiBaseUrl}/api/empresas`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nombre })
+                    body: JSON.stringify({ nombre: name, activo: true })
                 });
                 if (res.ok) {
                     const comp = await res.json();
                     selectedCompanyId = comp.id;
                     await loadCompanies();
                     closeModal('modal-company');
-                    input.value = '';
-                } else {
-                    const err = await res.json();
-                    alert(err.detail);
+                    document.getElementById('company-name-input').value = '';
                 }
             } catch (err) {
-                console.error("Error:", err);
+                console.error(err);
             }
         }
 
@@ -1364,19 +2169,13 @@
             const key = document.getElementById('config-key-input').value.trim();
             const val = document.getElementById('config-value-input').value.trim();
             const type = document.getElementById('config-type-select').value;
-            
             if (!key || !val) return;
 
             try {
                 const res = await fetch(`${apiBaseUrl}/api/configuraciones`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        empresa_id: selectedCompanyId,
-                        clave: key,
-                        valor: val,
-                        tipo: type
-                    })
+                    body: JSON.stringify({ empresa_id: selectedCompanyId, clave: key, valor: val, tipo: type })
                 });
                 if (res.ok) {
                     await loadConfigs();
@@ -1385,26 +2184,20 @@
                     document.getElementById('config-value-input').value = '';
                 }
             } catch (err) {
-                console.error("Error:", err);
+                console.error(err);
             }
         }
 
         async function submitAgent() {
-            const nombre = document.getElementById('agent-name-input').value.trim();
+            const name = document.getElementById('agent-name-input').value.trim();
             const rol = document.getElementById('agent-prompt-input').value.trim();
-
-            if (!nombre) return;
+            if (!name) return;
 
             try {
                 const res = await fetch(`${apiBaseUrl}/api/agentes`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        empresa_id: selectedCompanyId,
-                        nombre,
-                        rol_prompt: rol,
-                        status: 0
-                    })
+                    body: JSON.stringify({ empresa_id: selectedCompanyId, nombre: name, rol_prompt: rol, status: 0 })
                 });
                 if (res.ok) {
                     await loadAgentsAndTasks();
@@ -1413,7 +2206,7 @@
                     document.getElementById('agent-prompt-input').value = '';
                 }
             } catch (err) {
-                console.error("Error:", err);
+                console.error(err);
             }
         }
 
@@ -1422,20 +2215,13 @@
             const desc = document.getElementById('task-desc-input').value.trim();
             const agentIdVal = document.getElementById('task-agent-select').value;
             const agente_id = agentIdVal ? parseInt(agentIdVal) : null;
-
             if (!title) return;
 
             try {
                 const res = await fetch(`${apiBaseUrl}/api/tareas`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        empresa_id: selectedCompanyId,
-                        agente_id,
-                        titulo: title,
-                        descripcion: desc,
-                        estado: 'Pendiente'
-                    })
+                    body: JSON.stringify({ empresa_id: selectedCompanyId, agente_id, titulo: title, descripcion: desc, estado: 'Pendiente' })
                 });
                 if (res.ok) {
                     await loadAgentsAndTasks();
@@ -1451,12 +2237,8 @@
         async function deleteConfig(id) {
             if (!confirm('¿Seguro que desea eliminar esta configuración?')) return;
             try {
-                const res = await fetch(`${apiBaseUrl}/api/configuraciones/${id}`, {
-                    method: 'DELETE'
-                });
-                if (res.ok) {
-                    await loadConfigs();
-                }
+                const res = await fetch(`${apiBaseUrl}/api/configuraciones/${id}`, { method: 'DELETE' });
+                if (res.ok) await loadConfigs();
             } catch (err) {
                 console.error(err);
             }
@@ -1464,15 +2246,10 @@
 
         async function approveTask(taskId) {
             try {
-                const res = await fetch(`${apiBaseUrl}/api/tareas/${taskId}/aprobar`, {
-                    method: 'PUT'
-                });
-                if (res.ok) {
-                    addSystemLog('Acción humana autorizada para la tarea.', 'success');
-                    await loadAgentsAndTasks();
-                }
+                const res = await fetch(`${apiBaseUrl}/api/tareas/${taskId}/aprobar`, { method: 'PUT' });
+                if (res.ok) await loadAgentsAndTasks();
             } catch (err) {
-                console.error("Error aprobando tarea:", err);
+                console.error(err);
             }
         }
 
@@ -1480,7 +2257,7 @@
             addSystemLog('[SISTEMA] Iniciando sincronización manual de ventas y POS con Odoo...');
             setTimeout(() => {
                 addSystemLog('[Agente Administrativo] [ÉXITO] Sincronización de Odoo completada. 0 facturas nuevas encontradas.', 'success');
-            }, 1500);
+            }, 1200);
         }
 
         function clearLogs() {
@@ -1488,23 +2265,702 @@
             addSystemLog('Consola de eventos limpia.');
         }
 
-        function filterKanban() {
-            const query = document.getElementById('kanban-search').value.toLowerCase();
-            const cards = document.querySelectorAll('.kanban-lane .card');
+        // 6. Navigation and modularity
+        function toggleAppSwitcher() {
+            const switcher = document.getElementById('app-switcher');
+            if (switcher.style.display === 'flex') {
+                switcher.style.display = 'none';
+            } else {
+                switcher.style.display = 'flex';
+            }
+        }
+
+        function switchModule(modName) {
+            activeModule = modName;
             
-            cards.forEach(card => {
-                const name = card.querySelector('.agent-name').innerText.toLowerCase();
-                const role = card.querySelector('.agent-role').innerText.toLowerCase();
-                const task = card.querySelector('.agent-task-box') ? card.querySelector('.agent-task-box').innerText.toLowerCase() : '';
-                
-                if (name.includes(query) || role.includes(query) || task.includes(query)) {
-                    card.style.display = 'block';
+            // Hide App switcher if open
+            document.getElementById('app-switcher').style.display = 'none';
+            
+            // Toggle active viewport
+            document.querySelectorAll('.module-viewport').forEach(v => v.classList.remove('active'));
+            document.getElementById(`module-${modName}`).classList.add('active');
+            
+            // Toggle active menu link
+            document.querySelectorAll('.navbar-item').forEach(i => i.classList.remove('active'));
+            const navLink = document.getElementById(`nav-${modName}`);
+            if (navLink) navLink.classList.add('active');
+            
+            // Toggle control panel buttons
+            document.querySelectorAll('.view-actions').forEach(a => a.style.display = 'none');
+            const actionDiv = document.getElementById(`${modName}-actions`);
+            if (actionDiv) actionDiv.style.display = 'flex';
+
+            // Special actions for wiki
+            if (modName === 'wiki') {
+                loadWikiNotesAndBuildGraph();
+                setTimeout(initGraph, 100);
+            } else if (modName === 'ajustes') {
+                loadSettingsPanelData();
+            }
+        }
+
+        // 7. Global Search (Filters dynamically depending on active view)
+        function handleGlobalSearch() {
+            const query = document.getElementById('search-bar').value.toLowerCase();
+            
+            if (activeModule === 'tablero') {
+                const cards = document.querySelectorAll('.kanban-lane .card');
+                cards.forEach(card => {
+                    const name = card.querySelector('.agent-name').innerText.toLowerCase();
+                    const role = card.querySelector('.agent-role').innerText.toLowerCase();
+                    const task = card.querySelector('.agent-task-box') ? card.querySelector('.agent-task-box').innerText.toLowerCase() : '';
+                    if (name.includes(query) || role.includes(query) || task.includes(query)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            } else if (activeModule === 'wiki') {
+                const items = document.querySelectorAll('.wiki-note-item');
+                items.forEach(item => {
+                    const title = item.innerText.toLowerCase();
+                    if (title.includes(query)) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        // 8. Settings Module Logic
+        function switchSettingsPanel(panelName) {
+            activeSettingsPanel = panelName;
+            document.querySelectorAll('.settings-menu-item').forEach(m => m.classList.remove('active'));
+            document.getElementById(`menu-${panelName}`).classList.add('active');
+            loadSettingsPanelData();
+        }
+
+        async function loadSettingsPanelData() {
+            const container = document.getElementById('settings-panel-container');
+            container.innerHTML = '<h4>Cargando panel...</h4>';
+
+            if (activeSettingsPanel === 'users') {
+                try {
+                    // Load groups for the select modal
+                    const groupsRes = await fetch(`${apiBaseUrl}/api/grupos`);
+                    const groups = await groupsRes.json();
+                    const groupSelect = document.getElementById('user-group-select');
+                    groupSelect.innerHTML = '<option value="">Sin Grupo</option>';
+                    groups.forEach(g => {
+                        groupSelect.innerHTML += `<option value="${g.id}">${g.nombre}</option>`;
+                    });
+
+                    // Load users
+                    const usersRes = await fetch(`${apiBaseUrl}/api/usuarios`);
+                    const users = await usersRes.json();
+                    
+                    let rows = '';
+                    users.forEach(u => {
+                        const gr = groups.find(g => g.id === u.grupo_id);
+                        const groupName = gr ? gr.nombre : 'Ninguno';
+                        rows += `
+                            <tr>
+                                <td>${u.id}</td>
+                                <td><strong>${u.username}</strong></td>
+                                <td>${u.full_name || '-'}</td>
+                                <td><span style="color:${u.activo ? 'green':'red'}">${u.activo ? 'Activo':'Inactivo'}</span></td>
+                                <td>${groupName}</td>
+                                <td>
+                                    <button class="btn btn-danger" style="padding:3px 6px; font-size:11px;" onclick="deleteUser(${u.id})">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    container.innerHTML = `
+                        <div class="settings-section-title">Gestión de Usuarios</div>
+                        <table class="crud-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Usuario</th>
+                                    <th>Nombre Completo</th>
+                                    <th>Estado</th>
+                                    <th>Grupo</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows || '<tr><td colspan="6">No hay usuarios.</td></tr>'}</tbody>
+                        </table>
+                    `;
+                } catch (e) { console.error(e); }
+
+            } else if (activeSettingsPanel === 'groups') {
+                try {
+                    const groupsRes = await fetch(`${apiBaseUrl}/api/grupos`);
+                    const groups = await groupsRes.json();
+                    let rows = '';
+                    groups.forEach(g => {
+                        rows += `
+                            <tr>
+                                <td>${g.id}</td>
+                                <td><strong>${g.nombre}</strong></td>
+                                <td><code>${g.permisos || '[]'}</code></td>
+                                <td>
+                                    <button class="btn btn-danger" style="padding:3px 6px; font-size:11px;" onclick="deleteGroup(${g.id})">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    container.innerHTML = `
+                        <div class="settings-section-title">Gestión de Grupos de Permiso</div>
+                        <table class="crud-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre del Grupo</th>
+                                    <th>Permisos (JSON)</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows || '<tr><td colspan="4">No hay grupos creados.</td></tr>'}</tbody>
+                        </table>
+                    `;
+                } catch (e) { console.error(e); }
+
+            } else if (activeSettingsPanel === 'companies') {
+                try {
+                    const res = await fetch(`${apiBaseUrl}/api/empresas`);
+                    const companies = await res.json();
+                    let rows = '';
+                    companies.forEach(c => {
+                        rows += `
+                            <tr>
+                                <td>${c.id}</td>
+                                <td><strong>${c.nombre}</strong></td>
+                                <td><span style="color:${c.activo ? 'green':'red'}">${c.activo ? 'Activa':'Inactiva'}</span></td>
+                                <td>${new Date(c.fecha_creacion).toLocaleDateString()}</td>
+                                <td>-</td>
+                            </tr>
+                        `;
+                    });
+
+                    container.innerHTML = `
+                        <div class="settings-section-title">Gestión de Empresas</div>
+                        <table class="crud-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Empresa</th>
+                                    <th>Estado</th>
+                                    <th>Fecha de Creación</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows || '<tr><td colspan="5">No hay empresas.</td></tr>'}</tbody>
+                        </table>
+                    `;
+                } catch (e) { console.error(e); }
+            }
+        }
+
+        function openAjustesCreateModal() {
+            if (activeSettingsPanel === 'users') {
+                openModal('modal-ajustes-user');
+            } else if (activeSettingsPanel === 'groups') {
+                openModal('modal-ajustes-group');
+            } else if (activeSettingsPanel === 'companies') {
+                openModal('modal-company');
+            }
+        }
+
+        async function submitCreateUser() {
+            const userIn = document.getElementById('user-username-input').value.trim();
+            const nameIn = document.getElementById('user-fullname-input').value.trim();
+            const passIn = document.getElementById('user-password-input').value.trim();
+            const groupVal = document.getElementById('user-group-select').value;
+            const grupo_id = groupVal ? parseInt(groupVal) : null;
+
+            if (!userIn || !passIn) return;
+
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/usuarios`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: userIn, full_name: nameIn, password: passIn, activo: true, grupo_id })
+                });
+                if (res.ok) {
+                    closeModal('modal-ajustes-user');
+                    document.getElementById('user-username-input').value = '';
+                    document.getElementById('user-fullname-input').value = '';
+                    document.getElementById('user-password-input').value = '';
+                    await loadSettingsPanelData();
                 } else {
-                    card.style.display = 'none';
+                    const err = await res.json();
+                    alert(err.detail);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function submitCreateGroup() {
+            const nameIn = document.getElementById('group-name-input').value.trim();
+            const permIn = document.getElementById('group-permissions-input').value.trim();
+
+            if (!nameIn) return;
+
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/grupos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre: nameIn, permisos: permIn })
+                });
+                if (res.ok) {
+                    closeModal('modal-ajustes-group');
+                    document.getElementById('group-name-input').value = '';
+                    await loadSettingsPanelData();
+                } else {
+                    const err = await res.json();
+                    alert(err.detail);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('¿Está seguro de eliminar este usuario?')) return;
+            try {
+                await fetch(`${apiBaseUrl}/api/usuarios/${id}`, { method: 'DELETE' });
+                await loadSettingsPanelData();
+            } catch (e) { console.error(e); }
+        }
+
+        async function deleteGroup(id) {
+            if (!confirm('¿Está seguro de eliminar este grupo?')) return;
+            try {
+                await fetch(`${apiBaseUrl}/api/grupos/${id}`, { method: 'DELETE' });
+                await loadSettingsPanelData();
+            } catch (e) { console.error(e); }
+        }
+
+
+        // 9. Obsidian Wiki & Canvas Graph View Logic
+        async function loadWikiNotesAndBuildGraph() {
+            try {
+                const resNotes = await fetch(`${apiBaseUrl}/api/empresas/${selectedCompanyId}/notas`);
+                wikiNotes = await resNotes.json();
+
+                const container = document.getElementById('wiki-notes-list-container');
+                container.innerHTML = '';
+
+                if (wikiNotes.length === 0) {
+                    container.innerHTML = '<div style="font-size:12px; color:var(--text-muted); padding:10px;">No hay notas creadas en la wiki.</div>';
+                    // clear workspace
+                    document.getElementById('wiki-note-title-input').value = '';
+                    document.getElementById('wiki-note-editor-textarea').value = '';
+                    document.getElementById('wiki-preview-content-container').innerHTML = '';
+                    buildGraphData([], []);
+                    return;
+                }
+
+                wikiNotes.forEach(note => {
+                    const item = document.createElement('div');
+                    item.className = 'wiki-note-item';
+                    if (activeNote && activeNote.id === note.id) {
+                        item.classList.add('active');
+                    }
+                    item.innerHTML = `
+                        <span><i class="fa-regular fa-file-lines" style="margin-right:8px;"></i>${note.titulo}</span>
+                        <button class="delete-config-btn" style="position:static; opacity:0.5; color:#ef4444;" onclick="deleteWikiNote(${note.id}); event.stopPropagation();">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    `;
+                    item.onclick = () => selectWikiNote(note);
+                    container.appendChild(item);
+                });
+
+                if (!activeNote && wikiNotes.length > 0) {
+                    selectWikiNote(wikiNotes[0]);
+                } else if (activeNote) {
+                    // refresh current note
+                    const updated = wikiNotes.find(n => n.id === activeNote.id);
+                    if (updated) selectWikiNote(updated);
+                }
+
+                // Load agents to build relationship in the graph
+                buildGraphData(wikiNotes, cachedAgents);
+
+            } catch (e) {
+                console.error("Error al cargar notas wiki:", e);
+            }
+        }
+
+        function selectWikiNote(note) {
+            activeNote = note;
+            document.querySelectorAll('.wiki-note-item').forEach((item, index) => {
+                if (wikiNotes[index] && wikiNotes[index].id === note.id) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            document.getElementById('wiki-note-title-input').value = note.titulo;
+            document.getElementById('wiki-note-editor-textarea').value = note.contenido || '';
+            updateWikiPreview();
+        }
+
+        function openWikiNote(title) {
+            const note = wikiNotes.find(n => n.titulo.toLowerCase() === title.toLowerCase());
+            if (note) {
+                selectWikiNote(note);
+            } else {
+                // If it doesn't exist, we auto-create it or suggest writing it!
+                document.getElementById('wiki-note-title-input').value = title;
+                document.getElementById('wiki-note-editor-textarea').value = `# ${title}\n\nNueva nota conectada a través de wiki-links.`;
+                activeNote = null; // Mark as new note
+                updateWikiPreview();
+            }
+        }
+
+        function createNewWikiNote() {
+            activeNote = null;
+            document.getElementById('wiki-note-title-input').value = 'Nueva Nota';
+            document.getElementById('wiki-note-editor-textarea').value = '# Nueva Nota\n\nComienza a escribir tu documentación aquí...';
+            updateWikiPreview();
+        }
+
+        async function saveWikiNote() {
+            const title = document.getElementById('wiki-note-title-input').value.trim();
+            const content = document.getElementById('wiki-note-editor-textarea').value;
+
+            if (!title) return;
+
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/notas`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ empresa_id: selectedCompanyId, titulo: title, contenido: content })
+                });
+
+                if (res.ok) {
+                    const saved = await res.json();
+                    activeNote = saved;
+                    await loadWikiNotesAndBuildGraph();
+                    addSystemLog(`Nota wiki '${title}' guardada correctamente.`, 'success');
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function deleteWikiNote(id) {
+            if (!confirm("¿Está seguro de eliminar esta nota?")) return;
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/notas/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    if (activeNote && activeNote.id === id) activeNote = null;
+                    await loadWikiNotesAndBuildGraph();
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function updateWikiPreview() {
+            const text = document.getElementById('wiki-note-editor-textarea').value;
+            const container = document.getElementById('wiki-preview-content-container');
+            container.innerHTML = renderMarkdown(text);
+        }
+
+        function renderMarkdown(md) {
+            if (!md) return '';
+            let html = md;
+            
+            // Simple XSS escaping
+            html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            // Render Headings
+            html = html.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
+            html = html.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
+            html = html.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
+            
+            // Render bullet points
+            html = html.replace(/^\- (.*?)$/gm, '<li>$1</li>');
+            html = html.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>');
+            html = html.replace(/<\/ul>\s*<ul>/g, ''); // Fix double wrapper
+            
+            // Render Bold/Italics
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            // Wiki links: [[Wiki Name]]
+            html = html.replace(/\[\[(.*?)\]\]/g, (match, p1) => {
+                const title = p1.trim();
+                return `<a href="#" class="wiki-link" onclick="openWikiNote('${title}'); return false;">${title}</a>`;
+            });
+            
+            // Paragraphs (surround loose text blocks with <p>)
+            html = html.replace(/^(?!(?:<h|<li|<ul|<\/ul|<a|<p))(.*?)$/gm, '<p>$1</p>');
+            html = html.replace(/<p><\/p>/g, ''); // Clean empty paragraphs
+
+            return html;
+        }
+
+        // Graph view physics engine
+        let nodes = [];
+        let links = [];
+        let dragNode = null;
+        let graphCanvas = null;
+        let graphCtx = null;
+
+        function initGraph() {
+            graphCanvas = document.getElementById('graph-canvas');
+            if (!graphCanvas) return;
+            graphCtx = graphCanvas.getContext('2d');
+            
+            resizeGraphCanvas();
+            window.removeEventListener('resize', resizeGraphCanvas);
+            window.addEventListener('resize', resizeGraphCanvas);
+            
+            graphCanvas.removeEventListener('mousedown', onGraphMouseDown);
+            graphCanvas.addEventListener('mousedown', onGraphMouseDown);
+            
+            graphCanvas.removeEventListener('mousemove', onGraphMouseMove);
+            graphCanvas.addEventListener('mousemove', onGraphMouseMove);
+            
+            graphCanvas.removeEventListener('mouseup', onGraphMouseUp);
+            window.addEventListener('mouseup', onGraphMouseUp);
+            
+            // Cancel previous loops if running
+            if (!window.graphLoopStarted) {
+                window.graphLoopStarted = true;
+                requestAnimationFrame(updateGraph);
+            }
+        }
+
+        function resizeGraphCanvas() {
+            if (!graphCanvas) return;
+            const rect = graphCanvas.parentElement.getBoundingClientRect();
+            graphCanvas.width = rect.width;
+            graphCanvas.height = Math.max(180, rect.height - 30);
+        }
+
+        function buildGraphData(notes, agents) {
+            nodes = [];
+            links = [];
+            
+            // Center node (Company)
+            const compName = document.getElementById('header-company-name').innerText || 'Empresa';
+            nodes.push({ id: 'comp', label: compName, type: 'company', x: 150, y: 90, vx: 0, vy: 0 });
+            
+            // Agent nodes
+            agents.forEach((agent, i) => {
+                const nodeId = `agent-${agent.id}`;
+                nodes.push({
+                    id: nodeId,
+                    label: agent.nombre,
+                    type: 'agent',
+                    x: 150 + Math.cos(i) * 60,
+                    y: 90 + Math.sin(i) * 60,
+                    vx: 0,
+                    vy: 0
+                });
+                links.push({ source: 'comp', target: nodeId });
+            });
+            
+            // Note nodes
+            notes.forEach((note, i) => {
+                const nodeId = `note-${note.id}`;
+                nodes.push({
+                    id: nodeId,
+                    label: note.titulo,
+                    type: 'note',
+                    x: 150 + Math.cos(i + 2) * 100,
+                    y: 90 + Math.sin(i + 2) * 100,
+                    vx: 0,
+                    vy: 0,
+                    noteTitle: note.titulo
+                });
+                links.push({ source: 'comp', target: nodeId });
+                
+                // Parse connections between notes
+                const regex = /\[\[(.*?)\]\]/g;
+                let match;
+                while ((match = regex.exec(note.contenido || '')) !== null) {
+                    const targetTitle = match[1].trim().toLowerCase();
+                    const targetNote = notes.find(n => n.titulo.toLowerCase() === targetTitle);
+                    if (targetNote) {
+                        links.push({ source: nodeId, target: `note-${targetNote.id}` });
+                    } else {
+                        // link to agent
+                        const targetAgent = agents.find(a => a.nombre.toLowerCase() === targetTitle);
+                        if (targetAgent) {
+                            links.push({ source: nodeId, target: `agent-${targetAgent.id}` });
+                        }
+                    }
                 }
             });
         }
 
+        function updateGraph() {
+            if (!graphCanvas || !graphCtx || nodes.length === 0) {
+                requestAnimationFrame(updateGraph);
+                return;
+            }
+            
+            const width = graphCanvas.width;
+            const height = graphCanvas.height;
+            
+            const kRepulsion = 1200;
+            const kAttraction = 0.05;
+            const restLength = 60;
+            const centerAttraction = 0.02;
+            const friction = 0.8;
+            
+            // Repulsion force
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const n1 = nodes[i];
+                    const n2 = nodes[j];
+                    const dx = n2.x - n1.x;
+                    const dy = n2.y - n1.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                    if (dist < 300) {
+                        const force = kRepulsion / (dist * dist);
+                        const fx = (dx / dist) * force;
+                        const fy = (dy / dist) * force;
+                        
+                        n1.vx -= fx;
+                        n1.vy -= fy;
+                        n2.vx += fx;
+                        n2.vy += fy;
+                    }
+                }
+            }
+            
+            // Link attraction
+            links.forEach(link => {
+                const sourceNode = nodes.find(n => n.id === link.source);
+                const targetNode = nodes.find(n => n.id === link.target);
+                if (sourceNode && targetNode) {
+                    const dx = targetNode.x - sourceNode.x;
+                    const dy = targetNode.y - sourceNode.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                    const force = kAttraction * (dist - restLength);
+                    const fx = (dx / dist) * force;
+                    const fy = (dy / dist) * force;
+                    
+                    sourceNode.vx += fx;
+                    sourceNode.vy += fy;
+                    targetNode.vx -= fx;
+                    targetNode.vy -= fy;
+                }
+            });
+            
+            // Center physics & updates
+            nodes.forEach(node => {
+                if (node === dragNode) return;
+                
+                const dx = width / 2 - node.x;
+                const dy = height / 2 - node.y;
+                node.vx += dx * centerAttraction;
+                node.vy += dy * centerAttraction;
+                
+                node.x += node.vx;
+                node.y += node.vy;
+                node.vx *= friction;
+                node.vy *= friction;
+                
+                // Boundaries
+                node.x = Math.max(12, Math.min(width - 12, node.x));
+                node.y = Math.max(12, Math.min(height - 12, node.y));
+            });
+            
+            // Draw Frame
+            graphCtx.clearRect(0, 0, width, height);
+            
+            // Draw Edges
+            graphCtx.strokeStyle = document.body.classList.contains('dark-mode') ? '#3A3A42' : '#E2E8F0';
+            graphCtx.lineWidth = 1.2;
+            links.forEach(link => {
+                const sourceNode = nodes.find(n => n.id === link.source);
+                const targetNode = nodes.find(n => n.id === link.target);
+                if (sourceNode && targetNode) {
+                    graphCtx.beginPath();
+                    graphCtx.moveTo(sourceNode.x, sourceNode.y);
+                    graphCtx.lineTo(targetNode.x, targetNode.y);
+                    graphCtx.stroke();
+                }
+            });
+            
+            // Draw Nodes
+            nodes.forEach(node => {
+                graphCtx.beginPath();
+                let size = 6;
+                let color = '#4B5563';
+                
+                if (node.type === 'company') {
+                    size = 12;
+                    color = '#714B67';
+                } else if (node.type === 'agent') {
+                    size = 9;
+                    color = '#00A09D';
+                }
+                
+                graphCtx.arc(node.x, node.y, size, 0, 2 * Math.PI);
+                graphCtx.fillStyle = color;
+                graphCtx.fill();
+                graphCtx.strokeStyle = '#FFFFFF';
+                graphCtx.lineWidth = 1;
+                graphCtx.stroke();
+                
+                // Label
+                graphCtx.font = '500 9px Inter, sans-serif';
+                graphCtx.fillStyle = document.body.classList.contains('dark-mode') ? '#F3F4F6' : '#333333';
+                graphCtx.textAlign = 'center';
+                graphCtx.fillText(node.label, node.x, node.y - size - 3);
+            });
+            
+            requestAnimationFrame(updateGraph);
+        }
+
+        function onGraphMouseDown(e) {
+            const rect = graphCanvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+            
+            for (let i = 0; i < nodes.length; i++) {
+                const node = nodes[i];
+                let size = node.type === 'company' ? 12 : 9;
+                const dx = node.x - mx;
+                const dy = node.y - my;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist <= size + 4) {
+                    dragNode = node;
+                    if (node.type === 'note') {
+                        openWikiNote(node.noteTitle);
+                    }
+                    break;
+                }
+            }
+        }
+
+        function onGraphMouseMove(e) {
+            if (!dragNode) return;
+            const rect = graphCanvas.getBoundingClientRect();
+            dragNode.x = e.clientX - rect.left;
+            dragNode.y = e.clientY - rect.top;
+            dragNode.vx = 0;
+            dragNode.vy = 0;
+        }
+
+        function onGraphMouseUp() {
+            dragNode = null;
+        }
+
+        // Modals opening helper
         function openModal(id) {
             document.getElementById(id).style.display = 'flex';
         }

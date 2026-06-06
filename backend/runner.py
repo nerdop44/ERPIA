@@ -126,6 +126,114 @@ def create_mock_data():
                 db.add(new_log)
         db.commit()
 
+        # Siembra de Grupos
+        grupos_def = [
+            ("Administradores", '["all"]'),
+            ("Operadores", '["read", "write"]')
+        ]
+        grupos_map = {}
+        for nombre, perms in grupos_def:
+            ex_grupo = db.query(models.Grupo).filter(models.Grupo.nombre == nombre).first()
+            if not ex_grupo:
+                ex_grupo = models.Grupo(nombre=nombre, permisos=perms)
+                db.add(ex_grupo)
+                db.commit()
+                db.refresh(ex_grupo)
+                print(f"[+] Grupo creado: {nombre}")
+            grupos_map[nombre] = ex_grupo.id
+
+        # Siembra de Usuarios
+        import hashlib
+        admin_pwd_hash = hashlib.sha256("admin123".encode()).hexdigest()
+        op_pwd_hash = hashlib.sha256("op123".encode()).hexdigest()
+        usuarios_def = [
+            ("admin", admin_pwd_hash, "Administrador ERPIA", True, "Administradores"),
+            ("operador", op_pwd_hash, "Operador de Turno", True, "Operadores")
+        ]
+        for username, pwd_hash, full_name, activo, grupo_name in usuarios_def:
+            ex_user = db.query(models.Usuario).filter(models.Usuario.username == username).first()
+            grupo_id = grupos_map.get(grupo_name)
+            if not ex_user:
+                ex_user = models.Usuario(
+                    username=username,
+                    hashed_password=pwd_hash,
+                    full_name=full_name,
+                    activo=activo,
+                    grupo_id=grupo_id
+                )
+                db.add(ex_user)
+                print(f"[+] Usuario creado: {username}")
+        db.commit()
+
+        # Siembra de Notas (Obsidian Wiki)
+        notas_def = [
+            ("Instrucciones Generales", """# Instrucciones Generales para VenridesCafé
+
+Bienvenido al panel central de control de agentes de **VenridesCafé**. 
+Este sistema gestiona e interconecta nuestros flujos de negocio automáticos.
+
+### Agentes Disponibles
+- [[Agente Administrativo]]: Se encarga de conciliar pagos y facturar en Odoo.
+- [[Agente de Marketing]]: Redacta copys y envía alertas por redes sociales.
+- [[Agente de Operaciones]]: Audita tareas y controla la cuota del API.
+
+Para dudas adicionales, revisa la [[Guía de Soporte de Hermes]]."""),
+            ("Agente Administrativo", """# Agente Administrativo
+
+Este agente es responsable de la integración directa con Odoo v18.
+
+### Credenciales y Variables
+Las configuraciones están mapeadas en el panel izquierdo del sistema:
+- **Base de Datos Odoo:** vencafedb
+- **URL Servidor:** https://cafe.venrides.com
+
+### Tareas Principales
+- Conciliar facturas pendientes contra transacciones bancarias.
+- Emitir reportes semanales al administrador.
+
+Ver también: [[Instrucciones Generales]]."""),
+            ("Agente de Marketing", """# Agente de Marketing
+
+Se encarga de la gestión de redes sociales, Telegram bot y Live-Chat.
+
+### Tareas
+- Generar copys con promociones semanales.
+- Monitorear respuestas automáticas de clientes.
+
+Ver también: [[Instrucciones Generales]]."""),
+            ("Agente de Operaciones", """# Agente de Operaciones
+
+Watchdog principal y auditor de cuota del API.
+
+### Tareas
+- Verificación del token de Google en el script `/opt/data/google_test.py`.
+- Generar informe de recuperación cuando hay caídas de servicio.
+
+Ver también: [[Instrucciones Generales]]."""),
+            ("Guía de Soporte de Hermes", """# Guía de Soporte de Hermes
+
+En caso de fallos en la conexión:
+1. Revisa que el servicio `hermes` de Docker esté levantado en el VPS.
+2. Valida la URL de la API: http://hermes:8080/v1.
+
+Ver también: [[Instrucciones Generales]].""")
+        ]
+
+        for titulo, contenido in notas_def:
+            ex_nota = db.query(models.Nota).filter(
+                models.Nota.empresa_id == empresa.id,
+                models.Nota.titulo == titulo
+            ).first()
+            if not ex_nota:
+                new_nota = models.Nota(
+                    empresa_id=empresa.id,
+                    titulo=titulo,
+                    contenido=contenido
+                )
+                db.add(new_nota)
+                print(f"[+] Nota wiki creada: {titulo}")
+        db.commit()
+
         print("[✓] Carga de datos demo completada con éxito.")
     except Exception as e:
         print(f"[!] Error al cargar datos: {e}")

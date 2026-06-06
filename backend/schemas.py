@@ -97,3 +97,61 @@ class LogAuditoriaResponse(LogAuditoriaBase):
 class DashboardBroadcastPayload(BaseModel):
     type: str
     data: dict
+
+
+class GrupoBase(BaseModel):
+    nombre: str = Field(..., max_length=50)
+    permisos: Optional[str] = None
+
+class GrupoCreate(GrupoBase):
+    pass
+
+class GrupoResponse(GrupoBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
+class UsuarioBase(BaseModel):
+    username: str = Field(..., max_length=50)
+    full_name: Optional[str] = Field(None, max_length=100)
+    activo: Optional[bool] = True
+    grupo_id: Optional[int] = None
+
+class UsuarioCreate(UsuarioBase):
+    password: str = Field(..., max_length=100)
+
+class UsuarioResponse(UsuarioBase):
+    id: int
+    fecha_creacion: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class LoginResponse(BaseModel):
+    token: str
+    usuario: UsuarioResponse
+
+
+class NotaBase(BaseModel):
+    titulo: str = Field(..., max_length=150)
+    contenido: Optional[str] = None
+
+class NotaCreate(NotaBase):
+    empresa_id: int
+
+class NotaResponse(NotaBase):
+    id: int
+    empresa_id: int
+    fecha_actualizacion: datetime
+
+    class Config:
+        from_attributes = True
+

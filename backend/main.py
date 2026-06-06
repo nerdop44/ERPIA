@@ -1,4 +1,5 @@
 import json
+import hashlib
 from datetime import datetime
 from typing import List, Optional
 from fastapi import FastAPI, Depends, HTTPException, WebSocket, WebSocketDisconnect, status
@@ -306,6 +307,139 @@ async def create_log(log: schemas.LogAuditoriaCreate, db: Session = Depends(get_
 @app.get("/api/empresas/{empresa_id}/logs", response_model=List[schemas.LogAuditoriaResponse])
 def get_logs(empresa_id: int, db: Session = Depends(get_db)):
     return db.query(models.LogAuditoria).filter(models.LogAuditoria.empresa_id == empresa_id).order_by(models.LogAuditoria.timestamp.asc()).all()
+
+
+# Endpoints de Autenticación
+@app.post("/api/auth/login", response_model=schemas.LoginResponse)
+def login(payload: schemas.LoginRequest, db: Session = Depends(get_db)):
+    pwd_hash = hashlib.sha256(payload.password.encode()).hexdigest()
+    user = db.query(models.Usuario).filter(models.Usuario.username == payload.username).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="Usuario o contraseña incorrectos.")
+    
+    if user.hashed_password != pwd_hash and user.hashed_password != payload.password:
+        raise HTTPException(status_code=401, detail="Usuario o contraseña incorrectos.")
+    
+    # Si la contraseña estaba en texto plano (como la siembra inicial), la actualizamos hasheada
+    if user.hashed_password == payload.password:
+        user.hashed_password = pwd_hash
+        db.commit()
+        db.refresh(user)
+
+    return {
+        "token": f"token-{user.username}",
+        "usuario": user
+    }
+
+@app.get("/api/auth/me", response_model=schemas.UsuarioResponse)
+def get_me(token: str, db: Session = Depends(get_db)):
+    username = token.replace("token-", "")
+    user = db.query(models.Usuario).filter(models.Usuario.username == username).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="Sesión no válida.")
+    return user
+
+# CRUD Usuarios
+@app.get("/api/usuarios", response_model=List[schemas.UsuarioResponse])
+def get_usuarios(db: Session = Depends(get_db)):
+    return db.query(models.Usuario).all()
+
+@app.post("/api/usuarios", response_model=schemas.UsuarioResponse)
+def create_usuario(user: schemas.UsuarioCreate, db: Session = Depends(get_db)):
+    db_user = db.query(models.Usuario).filter(models.Usuario.username == user.username).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="El nombre de usuario ya existe.")
+    pwd_hash = hashlib.sha256(user.password.encode()).hexdigest()
+    
+    new_user = models.Usuario(
+        username=user.username,
+        hashed_password=pwd_hash,
+        full_name=user.full_name,
+        activo=user.activo,
+        grupo_id=user.grupo_id
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
+
+@app.delete("/api/usuarios/{id}")
+def delete_usuario(id: int, db: Session = Depends(get_db)):
+    user = db.query(models.Usuario).filter(models.Usuario.id == id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado.")
+    db.delete(user)
+    db.commit()
+    return {"message": "Usuario eliminado correctamente."}
+
+# CRUD Grupos
+@app.get("/api/grupos", response_model=List[schemas.GrupoResponse])
+def get_grupos(db: Session = Depends(get_db)):
+    return db.query(models.Grupo).all()
+
+@app.post("/api/grupos", response_model=schemas.GrupoResponse)
+def create_grupo(grupo: schemas.GrupoCreate, db: Session = Depends(get_db)):
+    db_grupo = db.query(models.Grupo).filter(models.Grupo.nombre == grupo.nombre).first()
+    if db_grupo:
+        raise HTTPException(status_code=400, detail="El nombre del grupo ya existe.")
+    new_grupo = models.Grupo(**grupo.dict())
+    db.add(new_grupo)
+    db.commit()
+    db.refresh(new_grupo)
+    return new_grupo
+
+@app.delete("/api/grupos/{id}")
+def delete_grupo(id: int, db: Session = Depends(get_db)):
+    grupo = db.query(models.Grupo).filter(models.Grupo.id == id).first()
+    if not grupo:
+        raise HTTPException(status_code=404, detail="Grupo no encontrado.")
+    db.delete(grupo)
+    db.commit()
+    return {"message": "Grupo eliminado correctamente."}
+
+# Endpoints de Notas (Obsidian Wiki)
+@app.get("/api/empresas/{empresa_id}/notas", response_model=List[schemas.NotaResponse])
+def get_notas(empresa_id: int, db: Session = Depends(get_db)):
+    return db.query(models.Nota).filter(models.Nota.empresa_id == empresa_id).all()
+
+@app.get("/api/empresas/{empresa_id}/notas/{titulo}", response_model=schemas.NotaResponse)
+def get_nota_by_titulo(empresa_id: int, titulo: str, db: Session = Depends(get_db)):
+    nota = db.query(models.Nota).filter(
+        models.Nota.empresa_id == empresa_id,
+        models.Nota.titulo == titulo
+    ).first()
+    if not nota:
+        raise HTTPException(status_code=404, detail="Nota no encontrada.")
+    return nota
+
+@app.post("/api/notas", response_model=schemas.NotaResponse)
+def create_or_update_nota(nota: schemas.NotaCreate, db: Session = Depends(get_db)):
+    db_nota = db.query(models.Nota).filter(
+        models.Nota.empresa_id == nota.empresa_id,
+        models.Nota.titulo == nota.titulo
+    ).first()
+    if db_nota:
+        db_nota.contenido = nota.contenido
+        db_nota.fecha_actualizacion = datetime.utcnow()
+        db.commit()
+        db.refresh(db_nota)
+        return db_nota
+    else:
+        new_nota = models.Nota(**nota.dict())
+        db.add(new_nota)
+        db.commit()
+        db.refresh(new_nota)
+        return new_nota
+
+@app.delete("/api/notas/{id}")
+def delete_nota(id: int, db: Session = Depends(get_db)):
+    nota = db.query(models.Nota).filter(models.Nota.id == id).first()
+    if not nota:
+        raise HTTPException(status_code=404, detail="Nota no encontrada.")
+    db.delete(nota)
+    db.commit()
+    return {"message": "Nota eliminada correctamente."}
+
 
 # Servir archivos estáticos del frontend
 app.mount("/", StaticFiles(directory="frontend", html=True), name="static")
