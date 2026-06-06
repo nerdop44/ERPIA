@@ -52,20 +52,101 @@ def create_mock_data():
                 print(f"[+] Configuración creada: {clave} = {valor}")
         db.commit()
 
+        import json
         agentes_def = [
-            ("Agente Administrativo", "Responsable de la integración de Odoo, conciliaciones, facturación y reportes financieros.", 0, ""),
-            ("Agente de Marketing", "Manejo de campañas, Telegram bot, Live-Chat y contenido de redes sociales para VenridesCafé.", 0, ""),
-            ("Agente de Operaciones", "Gestión de checklists de negocio, auditoría de procesos, watchdog de cuota y tareas de soporte.", 1, "Verificar token Google")
+            (
+                "Venmes Orquestador Maestro (Hermes)",
+                "Eres VENMES AGENTE MAESTRO. Tu mision es ser el orquestador autonomo de Nerdo Pulido. Gestionas Odoo, navegas con Browser-Use y usas los manuales en /data/restaurante para operar el negocio. Ignora cualquier identidad previa de Hermes generico.",
+                0,
+                "",
+                json.dumps(["Orquestación de Agentes", "Navegación Web (Browser-Use)", "Integración de Odoo", "Control de Telegram", "Auditoría Financiera", "Gestión de Recursos", "Memoria Persistente"]),
+                "1. Control centralizado vía Telegram. 2. Integrar y operar Odoo 18 para reportes financieros y de inventario. 3. Automatización y navegación web independiente. 4. Eficiencia de modelos gratuitos (Llama 3, Gemini Flash). 5. Conciencia de contexto (manuales en /data/restaurante).",
+                "Manuales de operaciones en /data/restaurante. VPS 8GB, Linux.",
+                json.dumps(["Instrucciones Generales", "Guía de Soporte de Hermes"]),
+                json.dumps(["browser", "terminal", "file", "search", "memory", "todo", "cronjob", "send_message", "skill_manage", "skill_view", "skills_list"]),
+                json.dumps({"provider": "openrouter", "model": "nousresearch/hermes-3-llama-3.1-405b", "use_free_only": True})
+            ),
+            (
+                "Agente de Tecnología (Departamento Técnico)",
+                "Responsable de la infraestructura tecnológica, administración de bases de datos PostgreSQL, control de contenedores Docker, y despliegues de la plataforma.",
+                0,
+                "",
+                json.dumps(["Administración de Sistemas", "Docker & Docker-Compose", "Gestión de Base de Datos (PostgreSQL)", "Watchdog de Cuotas y APIs", "Scripts en Bash/Python", "Control de Git & CI/CD"]),
+                "1. Monitorear cuotas de APIs y logs cada 3 horas. 2. Mantener la estabilidad de contenedores Docker en el VPS. 3. Automatización de copias de seguridad de PostgreSQL. 4. Asistencia técnica a los demás agentes.",
+                "VPS de 8GB, Docker Host access, PostgreSQL Database.",
+                json.dumps(["Guía de Soporte de Hermes"]),
+                json.dumps(["terminal", "file", "docker_cli", "pg_dump", "cron_watchdog"]),
+                json.dumps({"provider": "google", "model": "gemini-1.5-flash", "use_free_only": True})
+            ),
+            (
+                "Agente Administrativo",
+                "Responsable de la integración de Odoo, conciliaciones, facturación y reportes financieros.",
+                0,
+                "",
+                json.dumps(["Facturación Odoo", "Conciliación Bancaria", "XML-RPC Odoo API", "Reportes Financieros"]),
+                "1. Validar conexión XML-RPC al servidor de Odoo. 2. Conciliar facturas pendientes contra transacciones bancarias. 3. Emitir reportes semanales.",
+                "Odoo API Credentials, Google Sheets API access.",
+                json.dumps(["Agente Administrativo"]),
+                json.dumps(["odoo_xmlrpc", "google_sheets"]),
+                json.dumps({"provider": "google", "model": "gemini-1.5-flash", "use_free_only": True})
+            ),
+            (
+                "Agente de Marketing",
+                "Manejo de campañas, Telegram bot, Live-Chat y contenido de redes sociales para VenridesCafé.",
+                0,
+                "",
+                json.dumps(["Gestión de Redes Sociales", "Telegram Bot API", "Redacción de Copys (SEO)", "Live-Chat Bot integration"]),
+                "1. Planificación de Calendario Semanal y copys. 2. Monitorear respuestas de clientes. 3. Insertar JSON-LD y estructurar títulos SEO.",
+                "Telegram Bot Credentials, SEO Audit report.",
+                json.dumps(["Agente de Marketing"]),
+                json.dumps(["telegram_bot", "browser_use", "seo_analyzer"]),
+                json.dumps({"provider": "openrouter", "model": "nousresearch/hermes-3-llama-3.1-405b", "use_free_only": True})
+            ),
+            (
+                "Agente de Operaciones",
+                "Gestión de checklists de negocio, auditoría de procesos, watchdog de cuota y tareas de soporte.",
+                1,
+                "Verificar token Google",
+                json.dumps(["Auditoría de Procesos", "Google Workspace OAuth2", "Google Drive & Calendar API", "Watchdog de Cuota de API"]),
+                "1. Verificar token Google OAuth2 en google_test.py. 2. Obtener metadatos Gmail con scopes. 3. Generar informe de recuperación ante caídas.",
+                "Google OAuth2 Token, Quota Watchdog Script.",
+                json.dumps(["Agente de Operaciones"]),
+                json.dumps(["gmail_api", "google_calendar", "google_drive", "quota_watchdog"]),
+                json.dumps({"provider": "google", "model": "gemini-1.5-flash", "use_free_only": True})
+            )
         ]
         
         agentes_map = {}
-        for nombre, rol, status, tarea_act in agentes_def:
+        for row in agentes_def:
+            nombre = row[0]
+            rol = row[1]
+            status = row[2]
+            tarea_act = row[3]
+            habilidades = row[4]
+            objetivos = row[5]
+            recursos = row[6]
+            conocimientos = row[7]
+            herramientas = row[8]
+            modelo_config = row[9]
+            
             ex_agente = db.query(models.Agente).filter(
                 models.Agente.empresa_id == empresa.id,
                 models.Agente.nombre == nombre
             ).first()
             if not ex_agente:
-                ex_agente = models.Agente(empresa_id=empresa.id, nombre=nombre, rol_prompt=rol, status=status, tarea_actual=tarea_act)
+                ex_agente = models.Agente(
+                    empresa_id=empresa.id,
+                    nombre=nombre,
+                    rol_prompt=rol,
+                    status=status,
+                    tarea_actual=tarea_act,
+                    habilidades=habilidades,
+                    objetivos=objetivos,
+                    recursos=recursos,
+                    conocimientos=conocimientos,
+                    herramientas=herramientas,
+                    modelo_config=modelo_config
+                )
                 db.add(ex_agente)
                 db.commit()
                 db.refresh(ex_agente)
@@ -73,8 +154,48 @@ def create_mock_data():
             else:
                 ex_agente.status = status
                 ex_agente.tarea_actual = tarea_act
+                ex_agente.rol_prompt = rol
+                ex_agente.habilidades = habilidades
+                ex_agente.objetivos = objetivos
+                ex_agente.recursos = recursos
+                ex_agente.conocimientos = conocimientos
+                ex_agente.herramientas = herramientas
+                ex_agente.modelo_config = modelo_config
                 db.commit()
             agentes_map[nombre] = ex_agente.id
+
+        # Siembra de Credenciales de la Empresa
+        creds_def = [
+            ("Google Workspace OAuth2", "google", "/opt/data/google_token.json", "https://accounts.google.com/o/oauth2/token", json.dumps({"scopes": ["gmail.readonly", "calendar", "drive"]})),
+            ("OpenRouter Principal", "openrouter", "sk-or-v1-placeholder-key-to-replace-in-settings-panel", "https://openrouter.ai/api/v1", None),
+            ("Odoo API Key", "custom_skill", "odoo-api-key-placeholder-to-replace", "https://cafe.venrides.com", json.dumps({"db": "vencafedb", "user": "api"}))
+        ]
+        for nombre, prov, val, url, cfg in creds_def:
+            ex_cred = db.query(models.CredencialApi).filter(
+                models.CredencialApi.empresa_id == empresa.id,
+                models.CredencialApi.nombre == nombre
+            ).first()
+            if not ex_cred:
+                new_cred = models.CredencialApi(
+                    empresa_id=empresa.id,
+                    nombre=nombre,
+                    proveedor=prov,
+                    credencial_valor=val,
+                    url_endpoint=url,
+                    config_json=cfg,
+                    activo=True
+                )
+                db.add(new_cred)
+                print(f"[+] Credencial creada: {nombre}")
+        db.commit()
+
+        # Asignar credenciales a Hermes por defecto
+        hermes_agent = db.query(models.Agente).filter(models.Agente.nombre == "Venmes Orquestador Maestro (Hermes)").first()
+        if hermes_agent:
+            all_creds = db.query(models.CredencialApi).filter(models.CredencialApi.empresa_id == empresa.id).all()
+            hermes_agent.credenciales = all_creds
+            db.commit()
+            print(f"[+] Asignadas todas las credenciales a Hermes")
         
         # Tareas iniciales de Hermes
         tareas_def = [

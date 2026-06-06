@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from backend.database import engine, Base, get_db
 from backend import models, schemas
+from pydantic import BaseModel
 
 Base.metadata.create_all(bind=engine)
 
@@ -133,6 +134,13 @@ async def create_agente(agente: schemas.AgenteCreate, db: Session = Depends(get_
 def get_agentes(empresa_id: int, db: Session = Depends(get_db)):
     return db.query(models.Agente).filter(models.Agente.empresa_id == empresa_id).all()
 
+@app.get("/api/agentes/{id}", response_model=schemas.AgenteResponse)
+def get_agente_by_id(id: int, db: Session = Depends(get_db)):
+    agente = db.query(models.Agente).filter(models.Agente.id == id).first()
+    if not agente:
+        raise HTTPException(status_code=404, detail="Agente no encontrado")
+    return agente
+
 @app.put("/api/agentes/{id}/status", response_model=schemas.AgenteResponse)
 async def update_agente_status(id: int, payload: schemas.AgenteStatusUpdate, db: Session = Depends(get_db)):
     agente = db.query(models.Agente).filter(models.Agente.id == id).first()
@@ -151,6 +159,43 @@ async def update_agente_status(id: int, payload: schemas.AgenteStatusUpdate, db:
             "nombre": agente.nombre,
             "status": agente.status,
             "tarea_actual": agente.tarea_actual
+        }
+    })
+    return agente
+
+@app.put("/api/agentes/{id}", response_model=schemas.AgenteResponse)
+async def update_agente(id: int, payload: schemas.AgenteBase, db: Session = Depends(get_db)):
+    agente = db.query(models.Agente).filter(models.Agente.id == id).first()
+    if not agente:
+        raise HTTPException(status_code=404, detail="Agente no encontrado")
+    
+    agente.nombre = payload.nombre
+    agente.rol_prompt = payload.rol_prompt
+    agente.habilidades = payload.habilidades
+    agente.objetivos = payload.objetivos
+    agente.recursos = payload.recursos
+    agente.conocimientos = payload.conocimientos
+    agente.herramientas = payload.herramientas
+    agente.modelo_config = payload.modelo_config
+    
+    db.commit()
+    db.refresh(agente)
+    
+    await manager.broadcast({
+        "type": "agente_actualizado",
+        "data": {
+            "id": agente.id,
+            "empresa_id": agente.empresa_id,
+            "nombre": agente.nombre,
+            "rol_prompt": agente.rol_prompt,
+            "status": agente.status,
+            "tarea_actual": agente.tarea_actual,
+            "habilidades": agente.habilidades,
+            "objetivos": agente.objetivos,
+            "recursos": agente.recursos,
+            "conocimientos": agente.conocimientos,
+            "herramientas": agente.herramientas,
+            "modelo_config": agente.modelo_config
         }
     })
     return agente
@@ -439,6 +484,407 @@ def delete_nota(id: int, db: Session = Depends(get_db)):
     db.delete(nota)
     db.commit()
     return {"message": "Nota eliminada correctamente."}
+
+
+# =====================================================================
+# FASE 3 - ENDPOINTS DE CREDENCIALES
+# =====================================================================
+
+@app.get("/api/empresas/{empresa_id}/credenciales", response_model=List[schemas.CredencialApiResponse])
+def get_credenciales(empresa_id: int, db: Session = Depends(get_db)):
+    return db.query(models.CredencialApi).filter(models.CredencialApi.empresa_id == empresa_id).all()
+
+@app.post("/api/credenciales", response_model=schemas.CredencialApiResponse)
+def create_or_update_credencial(payload: schemas.CredencialApiCreate, db: Session = Depends(get_db)):
+    db_cred = db.query(models.CredencialApi).filter(
+        models.CredencialApi.empresa_id == payload.empresa_id,
+        models.CredencialApi.nombre == payload.nombre
+    ).first()
+    if db_cred:
+        db_cred.proveedor = payload.proveedor
+        db_cred.credencial_valor = payload.credencial_valor
+        db_cred.url_endpoint = payload.url_endpoint
+        db_cred.config_json = payload.config_json
+        db_cred.activo = payload.activo
+        db.commit()
+        db.refresh(db_cred)
+        return db_cred
+    else:
+        new_cred = models.CredencialApi(**payload.dict())
+        db.add(new_cred)
+        db.commit()
+        db.refresh(new_cred)
+        return new_cred
+
+@app.delete("/api/credenciales/{id}")
+def delete_credencial(id: int, db: Session = Depends(get_db)):
+    cred = db.query(models.CredencialApi).filter(models.CredencialApi.id == id).first()
+    if not cred:
+        raise HTTPException(status_code=404, detail="Credencial no encontrada")
+    db.delete(cred)
+    db.commit()
+    return {"message": "Credencial eliminada correctamente."}
+
+@app.post("/api/agentes/{agente_id}/credenciales/{credencial_id}")
+def link_credencial_agente(agente_id: int, credencial_id: int, db: Session = Depends(get_db)):
+    agente = db.query(models.Agente).filter(models.Agente.id == agente_id).first()
+    cred = db.query(models.CredencialApi).filter(models.CredencialApi.id == credencial_id).first()
+    if not agente or not cred:
+        raise HTTPException(status_code=404, detail="Agente o credencial no encontrada")
+    if cred not in agente.credenciales:
+        agente.credenciales.append(cred)
+        db.commit()
+    return {"message": "Credencial vinculada correctamente"}
+
+@app.delete("/api/agentes/{agente_id}/credenciales/{credencial_id}")
+def unlink_credencial_agente(agente_id: int, credencial_id: int, db: Session = Depends(get_db)):
+    agente = db.query(models.Agente).filter(models.Agente.id == agente_id).first()
+    cred = db.query(models.CredencialApi).filter(models.CredencialApi.id == credencial_id).first()
+    if not agente or not cred:
+        raise HTTPException(status_code=404, detail="Agente o credencial no encontrada")
+    if cred in agente.credenciales:
+        agente.credenciales.remove(cred)
+        db.commit()
+    return {"message": "Credencial desvinculada correctamente"}
+
+# =====================================================================
+# FASE 3 - ENDPOINTS DE CHAT E INTEGRACIÓN CON MODELOS REALES
+# =====================================================================
+
+@app.get("/api/agentes/{agente_id}/chat", response_model=List[schemas.MensajeChatResponse])
+def get_chat_history(agente_id: int, db: Session = Depends(get_db)):
+    return db.query(models.MensajeChat).filter(models.MensajeChat.agente_id == agente_id).order_by(models.MensajeChat.timestamp.asc()).all()
+
+import urllib.request
+import urllib.parse
+
+@app.post("/api/agentes/{agente_id}/chat", response_model=schemas.MensajeChatResponse)
+async def send_chat_message(agente_id: int, payload: schemas.MensajeChatCreate, db: Session = Depends(get_db)):
+    agente = db.query(models.Agente).filter(models.Agente.id == agente_id).first()
+    if not agente:
+        raise HTTPException(status_code=404, detail="Agente no encontrado")
+        
+    # Guardar mensaje del usuario
+    user_msg = models.MensajeChat(
+        agente_id=agente_id,
+        usuario_id=payload.usuario_id,
+        remitente=payload.remitente,
+        contenido=payload.contenido
+    )
+    db.add(user_msg)
+    db.commit()
+    db.refresh(user_msg)
+    
+    # Notificar WebSocket del nuevo mensaje
+    await manager.broadcast({
+        "type": "nuevo_mensaje_chat",
+        "data": {
+            "id": user_msg.id,
+            "agente_id": agente_id,
+            "remitente": user_msg.remitente,
+            "contenido": user_msg.contenido,
+            "timestamp": user_msg.timestamp
+        }
+    })
+
+    # Cambiar estado del agente a "Pensando" (status = 1)
+    agente.status = 1
+    agente.tarea_actual = "Respondiendo en el chat..."
+    db.commit()
+    await manager.broadcast({
+        "type": "agente_status_update",
+        "data": {
+            "id": agente.id,
+            "empresa_id": agente.empresa_id,
+            "nombre": agente.nombre,
+            "status": agente.status,
+            "tarea_actual": agente.tarea_actual
+        }
+    })
+
+    # Buscar conocimiento relevante de la wiki de esta empresa
+    wiki_context = ""
+    linked_notes = []
+    if agente.conocimientos:
+        try:
+            linked_notes = json.loads(agente.conocimientos)
+        except Exception:
+            linked_notes = []
+            
+    notes = db.query(models.Nota).filter(models.Nota.empresa_id == agente.empresa_id).all()
+    wiki_context_list = []
+    for note in notes:
+        # Añadir si está expresamente vinculada o si se menciona en el mensaje actual
+        if note.titulo in linked_notes or note.titulo.lower() in payload.contenido.lower():
+            wiki_context_list.append(f"Nota: {note.titulo}\nContenido:\n{note.contenido}")
+            
+    if wiki_context_list:
+        wiki_context = "\n\n=== CONOCIMIENTO DISPONIBLE EN OBSIDIAN WIKI ===\n" + "\n---\n".join(wiki_context_list) + "\n==============================================\n"
+
+    # Preparar Prompt de Sistema
+    system_prompt = (
+        f"Eres el agente '{agente.nombre}'.\n"
+        f"Tu rol/instrucciones son:\n{agente.rol_prompt or ''}\n"
+        f"Habilidades: {agente.habilidades or 'Ninguna'}\n"
+        f"Objetivos: {agente.objetivos or 'Ninguno'}\n"
+        f"{wiki_context}\n"
+        f"Por favor responde de forma profesional e interactiva, alineado con tu rol. "
+        f"No inventes datos ni alucines. Si no sabes algo o careces de permisos, indícalo claramente."
+    )
+
+    # Cargar historial de chat (últimos 15 mensajes)
+    historial = db.query(models.MensajeChat).filter(
+        models.MensajeChat.agente_id == agente_id
+    ).order_by(models.MensajeChat.timestamp.desc()).limit(15).all()
+    historial = list(reversed(historial))
+
+    # Construir lista de mensajes para la API
+    messages_payload = [{"role": "system", "content": system_prompt}]
+    for h in historial:
+        role = "assistant" if h.remitente == "agente" else "user"
+        # Evitar duplicar el último mensaje recién agregado si ya viene en el historial
+        if h.id != user_msg.id:
+            messages_payload.append({"role": role, "content": h.contenido})
+    messages_payload.append({"role": "user", "content": payload.contenido})
+
+    # Determinar qué modelo y proveedor usar
+    provider = "google"
+    model_name = "gemini-1.5-flash"
+    use_free_only = True
+    
+    if agente.modelo_config:
+        try:
+            cfg = json.loads(agente.modelo_config)
+            provider = cfg.get("provider", provider)
+            model_name = cfg.get("model", model_name)
+            use_free_only = cfg.get("use_free_only", use_free_only)
+        except Exception:
+            pass
+
+    respuesta_texto = ""
+
+    # Caso especial: Hermes (conexión real al contenedor del VPS)
+    if "Hermes" in agente.nombre:
+        try:
+            req_url = "http://hermes:8642/v1/chat/completions"
+            data_payload = {
+                "model": model_name,
+                "messages": messages_payload
+            }
+            req_data = json.dumps(data_payload).encode("utf-8")
+            req = urllib.request.Request(
+                req_url,
+                data=req_data,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer hermes-webui-key"
+                },
+                method="POST"
+            )
+            with urllib.request.urlopen(req, timeout=30) as response:
+                resp_data = json.loads(response.read().decode("utf-8"))
+                respuesta_texto = resp_data["choices"][0]["message"]["content"]
+        except Exception as e:
+            respuesta_texto = f"Error al conectar con la API de Hermes en el VPS: {str(e)}. Por favor verifica que el contenedor 'hermes' esté activo."
+    else:
+        # Consultar mediante credenciales de la empresa
+        cred = db.query(models.CredencialApi).filter(
+            models.CredencialApi.empresa_id == agente.empresa_id,
+            models.CredencialApi.proveedor == provider,
+            models.CredencialApi.activo == True
+        ).first()
+
+        api_key = cred.credencial_valor if cred else None
+
+        if not api_key:
+            # Fallback a credencial de OpenRouter global
+            fallback_cred = db.query(models.CredencialApi).filter(
+                models.CredencialApi.proveedor == "openrouter",
+                models.CredencialApi.activo == True
+            ).first()
+            if fallback_cred:
+                api_key = fallback_cred.credencial_valor
+                provider = "openrouter"
+                
+        if not api_key:
+            respuesta_texto = "Error: No se encontró una API Key configurada para este proveedor en la empresa."
+        else:
+            try:
+                if provider == "google":
+                    req_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+                    
+                    full_text = f"INSTRUCCIONES DE SISTEMA:\n{system_prompt}\n\nHISTORIAL Y MENSAJE:\n"
+                    for msg in messages_payload[1:]:
+                        full_text += f"{msg['role'].upper()}: {msg['content']}\n"
+                    
+                    data_payload = {
+                        "contents": [
+                            {"parts": [{"text": full_text}]}
+                        ]
+                    }
+                    req_data = json.dumps(data_payload).encode("utf-8")
+                    req = urllib.request.Request(
+                        req_url,
+                        data=req_data,
+                        headers={"Content-Type": "application/json"},
+                        method="POST"
+                    )
+                    with urllib.request.urlopen(req, timeout=30) as response:
+                        resp_data = json.loads(response.read().decode("utf-8"))
+                        respuesta_texto = resp_data["candidates"][0]["content"]["parts"][0]["text"]
+
+                elif provider == "openrouter":
+                    req_url = "https://openrouter.ai/api/v1/chat/completions"
+                    data_payload = {
+                        "model": model_name,
+                        "messages": messages_payload
+                    }
+                    req_data = json.dumps(data_payload).encode("utf-8")
+                    req = urllib.request.Request(
+                        req_url,
+                        data=req_data,
+                        headers={
+                            "Content-Type": "application/json",
+                            "Authorization": f"Bearer {api_key}",
+                            "HTTP-Referer": "http://erpia.venrides.com"
+                        },
+                        method="POST"
+                    )
+                    with urllib.request.urlopen(req, timeout=30) as response:
+                        resp_data = json.loads(response.read().decode("utf-8"))
+                        respuesta_texto = resp_data["choices"][0]["message"]["content"]
+                else:
+                    respuesta_texto = f"Proveedor de modelo '{provider}' no implementado todavía."
+            except Exception as e:
+                respuesta_texto = f"Error al ejecutar consulta al modelo ({provider}): {str(e)}"
+
+    # Guardar respuesta del agente
+    agent_msg = models.MensajeChat(
+        agente_id=agente_id,
+        usuario_id=None,
+        remitente="agente",
+        contenido=respuesta_texto
+    )
+    db.add(agent_msg)
+    
+    # Restaurar estado del agente
+    agente.status = 0
+    agente.tarea_actual = ""
+    db.commit()
+    db.refresh(agent_msg)
+
+    # Notificar WebSocket
+    await manager.broadcast({
+        "type": "nuevo_mensaje_chat",
+        "data": {
+            "id": agent_msg.id,
+            "agente_id": agente_id,
+            "remitente": agent_msg.remitente,
+            "contenido": agent_msg.contenido,
+            "timestamp": agent_msg.timestamp
+        }
+    })
+    
+    await manager.broadcast({
+        "type": "agente_status_update",
+        "data": {
+            "id": agente.id,
+            "empresa_id": agente.empresa_id,
+            "nombre": agente.nombre,
+            "status": agente.status,
+            "tarea_actual": agente.tarea_actual
+        }
+    })
+
+    return agent_msg
+
+
+# =====================================================================
+# FASE 3 - ENDPOINTS DE BUSQUEDA EXTERNA / NOTEBOOKLM
+# =====================================================================
+
+class NotebookLMSearchRequest(BaseModel):
+    empresa_id: int
+    query: str
+
+@app.post("/api/knowledge/notebooklm/search")
+def search_external_knowledge(payload: NotebookLMSearchRequest, db: Session = Depends(get_db)):
+    cred = db.query(models.CredencialApi).filter(
+        models.CredencialApi.empresa_id == payload.empresa_id,
+        models.CredencialApi.proveedor == "google",
+        models.CredencialApi.activo == True
+    ).first()
+    
+    api_key = cred.credencial_valor if cred else None
+    
+    if not api_key:
+        fallback_cred = db.query(models.CredencialApi).filter(
+            models.CredencialApi.proveedor == "openrouter",
+            models.CredencialApi.activo == True
+        ).first()
+        if fallback_cred:
+            api_key = fallback_cred.credencial_valor
+
+    if not api_key:
+        raise HTTPException(status_code=400, detail="No hay credenciales configuradas para realizar la búsqueda.")
+
+    try:
+        req_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+        
+        system_instructions = (
+            "Eres el servicio NotebookLM Integrado de ERPIA. Tu tarea es buscar información externa y "
+            "estructurar una nota de conocimiento comprensiva, detallada, útil y profesional con formato markdown. "
+            "Incluye fuentes de datos de alta calidad o conceptos teóricos sólidos."
+        )
+        
+        prompt = f"Investiga detalladamente sobre el siguiente tema y genera una nota de conocimiento estructurada:\n\n{payload.query}"
+        full_text = f"INSTRUCCIONES:\n{system_instructions}\n\nTEMA:\n{prompt}"
+        
+        data_payload = {
+            "contents": [
+                {"parts": [{"text": full_text}]}
+            ]
+        }
+        req_data = json.dumps(data_payload).encode("utf-8")
+        req = urllib.request.Request(
+            req_url,
+            data=req_data,
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=30) as response:
+            resp_data = json.loads(response.read().decode("utf-8"))
+            respuesta_texto = resp_data["candidates"][0]["content"]["parts"][0]["text"]
+            
+        return {
+            "titulo": f"NotebookLM: {payload.query}",
+            "contenido": respuesta_texto
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error en la consulta NotebookLM: {str(e)}")
+
+
+# =====================================================================
+# FASE 3 - EXPORTAR WIKI A FORMATO ZIP/JSON PARA NOTEBOOKLM/OBSIDIAN
+# =====================================================================
+
+@app.get("/api/empresas/{empresa_id}/wiki/export")
+def export_wiki_vault(empresa_id: int, db: Session = Depends(get_db)):
+    notas = db.query(models.Nota).filter(models.Nota.empresa_id == empresa_id).all()
+    
+    vault_export = []
+    for nota in notas:
+        vault_export.append({
+            "filename": f"{nota.titulo}.md",
+            "content": f"# {nota.titulo}\n\nÚltima actualización: {nota.fecha_actualizacion.isoformat()}\n\n{nota.contenido}"
+        })
+        
+    return {
+        "empresa_id": empresa_id,
+        "export_date": datetime.utcnow().isoformat(),
+        "notes_count": len(notas),
+        "vault": vault_export
+    }
 
 
 # Servir archivos estáticos del frontend

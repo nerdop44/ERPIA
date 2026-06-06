@@ -386,13 +386,159 @@
         /* Layout Framework modules */
         .module-viewport {
             flex-grow: 1;
-            height: calc(100vh - 98px);
+            height: calc(100vh - 136px);
             overflow: hidden;
             display: none;
         }
 
         .module-viewport.active {
             display: block;
+        }
+
+        /* Workspace Tab Bar */
+        .workspace-tab-bar {
+            background-color: var(--bg-white);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: flex-end;
+            padding: 6px 15px 0 15px;
+            height: 38px;
+            gap: 4px;
+            overflow-x: auto;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .workspace-tab {
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .workspace-tab:hover {
+            color: var(--text-dark);
+            background-color: var(--bg-white);
+        }
+        .workspace-tab.active {
+            color: var(--odoo-primary);
+            background-color: var(--bg-white);
+            border-bottom: 1px solid var(--bg-white);
+            font-weight: 600;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.02);
+            position: relative;
+            z-index: 2;
+        }
+        body.dark-mode .workspace-tab.active {
+            color: var(--odoo-secondary);
+        }
+        .workspace-tab .close-tab {
+            font-size: 14px;
+            cursor: pointer;
+            color: var(--text-muted);
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .workspace-tab .close-tab:hover {
+            background-color: #EF4444;
+            color: white;
+        }
+
+        /* Agent Workspace split view */
+        .agent-workspace-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            height: 100%;
+            background-color: var(--bg-light);
+        }
+        .agent-chat-section {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border-right: 1px solid var(--border-color);
+            background-color: var(--bg-white);
+        }
+        .agent-chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .agent-chat-input-area {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+            background-color: var(--bg-white);
+        }
+        .agent-chat-input-area textarea {
+            flex-grow: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 13px;
+            resize: none;
+            height: 40px;
+            font-family: var(--font-body);
+            outline: none;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+        }
+        .agent-profile-section {
+            padding: 20px;
+            overflow-y: auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .agent-profile-card {
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 18px;
+            box-shadow: var(--card-shadow);
+        }
+        .agent-chat-bubble {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .agent-chat-bubble.user {
+            align-self: flex-end;
+            background-color: var(--odoo-primary);
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+        .agent-chat-bubble.agent {
+            align-self: flex-start;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            border-bottom-left-radius: 2px;
+            border: 1px solid var(--border-color);
+        }
+        .agent-status-indicator {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 4px 10px;
         }
 
         /* Tablero Module Columns Layout */
@@ -590,6 +736,7 @@
             transition: box-shadow 0.2s, border-color 0.2s, background-color 0.3s;
             box-shadow: var(--card-shadow);
             position: relative;
+            cursor: pointer;
         }
 
         body.dark-mode .card {
@@ -1284,6 +1431,22 @@
             </div>
         </header>
 
+        <!-- Workspace Tab Bar -->
+        <div id="workspace-tab-bar" class="workspace-tab-bar">
+            <div class="workspace-tab active" id="tab-tablero" onclick="switchModule('tablero')">
+                <i class="fa-solid fa-table-columns"></i>
+                <span>Tablero</span>
+            </div>
+            <div class="workspace-tab" id="tab-wiki" onclick="switchModule('wiki')">
+                <i class="fa-solid fa-book-open"></i>
+                <span>Obsidian Wiki</span>
+            </div>
+            <div class="workspace-tab" id="tab-ajustes" onclick="switchModule('ajustes')">
+                <i class="fa-solid fa-sliders"></i>
+                <span>Ajustes</span>
+            </div>
+        </div>
+
         <!-- Odoo Control Panel -->
         <div class="control-panel">
             <div class="breadcrumbs">
@@ -1308,11 +1471,20 @@
                     <button class="btn btn-success" onclick="saveWikiNote()">
                         <i class="fa-solid fa-floppy-disk"></i> Guardar Nota
                     </button>
+                    <button class="btn btn-secondary" onclick="exportWikiVault()">
+                        <i class="fa-solid fa-download"></i> Exportar Wiki
+                    </button>
                 </div>
                 
                 <div id="ajustes-actions" class="view-actions" style="display:none;">
                     <button class="btn" id="btn-ajustes-create" onclick="openAjustesCreateModal()">
                         <i class="fa-solid fa-plus"></i> Crear Registro
+                    </button>
+                </div>
+
+                <div id="agent-actions" class="view-actions" style="display:none;">
+                    <button class="btn btn-success" id="btn-save-agent" onclick="saveActiveAgentConfig()">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios
                     </button>
                 </div>
 
@@ -1422,6 +1594,20 @@
                     <div class="wiki-notes-list" id="wiki-notes-list-container">
                         <!-- Note list items filled dynamically -->
                     </div>
+
+                    <!-- NotebookLM Search Helper -->
+                    <div class="notebooklm-container" style="padding: 15px; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); background-color: var(--bg-light); margin-top: auto;">
+                        <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase;">
+                            <i class="fa-solid fa-brain"></i> NotebookLM Helper
+                        </div>
+                        <div style="display: flex; gap: 5px; margin-bottom: 5px;">
+                            <input type="text" id="notebooklm-query" placeholder="Buscar/Generar conocimiento..." style="flex-grow:1; font-size:12px; padding:6px; border:1px solid var(--border-color); border-radius:4px; outline:none; background:var(--bg-white); color:var(--text-dark);">
+                            <button class="btn" onclick="runNotebookLMSearch()" style="padding:5px 8px; font-size:12px;"><i class="fa-solid fa-magnifying-glass"></i></button>
+                        </div>
+                        <div id="notebooklm-status" style="font-size:10px; color:var(--text-muted); display:none;">
+                            <i class="fa-solid fa-spinner fa-spin"></i> Consultando NotebookLM...
+                        </div>
+                    </div>
                     
                     <!-- Interactive Graph View -->
                     <div class="graph-view-container">
@@ -1463,6 +1649,9 @@
                     </div>
                     <div class="settings-menu-item" id="menu-companies" onclick="switchSettingsPanel('companies')">
                         <i class="fa-solid fa-building" style="margin-right:10px;"></i>Empresas
+                    </div>
+                    <div class="settings-menu-item" id="menu-credentials" onclick="switchSettingsPanel('credentials')">
+                        <i class="fa-solid fa-key" style="margin-right:10px;"></i>Credenciales API
                     </div>
                 </div>
                 <div class="settings-content">
@@ -1652,6 +1841,41 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('modal-ajustes-group')">Descartar</button>
                 <button class="btn" onclick="submitCreateGroup()">Crear Grupo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ajustes: Crear Credencial API -->
+    <div id="modal-ajustes-credential" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Agregar Credencial de API</span>
+                <button class="close-modal" onclick="closeModal('modal-ajustes-credential')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="cred-name-input">Nombre de la Credencial</label>
+                    <input type="text" id="cred-name-input" placeholder="Ej: Gemini API Key / OpenRouter Key">
+                </div>
+                <div class="form-group">
+                    <label for="cred-provider-select">Proveedor de LLM</label>
+                    <select id="cred-provider-select">
+                        <option value="google">Google Gemini</option>
+                        <option value="openrouter">OpenRouter</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cred-value-input">Valor de la Credencial (API Key / Token)</label>
+                    <input type="password" id="cred-value-input" placeholder="Ingrese el API Key / Token">
+                </div>
+                <div class="form-group">
+                    <label for="cred-endpoint-input">URL de Endpoint (Opcional)</label>
+                    <input type="text" id="cred-endpoint-input" placeholder="Ej: https://generativelanguage.googleapis.com">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-ajustes-credential')">Descartar</button>
+                <button class="btn" onclick="submitCreateCredential()">Agregar Credencial</button>
             </div>
         </div>
     </div>
@@ -1858,6 +2082,18 @@
                 if (data.empresa_id === selectedCompanyId) {
                     loadAgentsAndTasks();
                     if (activeModule === 'wiki') loadWikiNotesAndBuildGraph(); // update wiki graph in case agent changes
+                    if (type === 'agente_status_update') {
+                        updateAgentStatusUI(data.id, data.status, data.tarea_actual);
+                    }
+                }
+            } else if (type === 'nuevo_mensaje_chat') {
+                const container = document.getElementById(`agent-chat-messages-${data.agente_id}`);
+                if (container && data.remitente === 'agente') {
+                    const bubble = document.createElement('div');
+                    bubble.className = 'agent-chat-bubble agent';
+                    bubble.textContent = data.contenido;
+                    container.appendChild(bubble);
+                    container.scrollTop = container.scrollHeight;
                 }
             }
         }
@@ -1988,6 +2224,10 @@
                 cachedAgents.forEach(agent => {
                     const card = document.createElement('div');
                     card.className = 'card';
+                    card.onclick = (e) => {
+                        if (e.target.closest('.btn-approve-action')) return;
+                        openAgentWorkspace(agent.id, agent.nombre);
+                    };
                     
                     let activeTaskHtml = `
                         <div class="agent-task-box">
@@ -2289,10 +2529,23 @@
             document.querySelectorAll('.navbar-item').forEach(i => i.classList.remove('active'));
             const navLink = document.getElementById(`nav-${modName}`);
             if (navLink) navLink.classList.add('active');
+
+            // Toggle active workspace tab
+            document.querySelectorAll('.workspace-tab').forEach(t => t.classList.remove('active'));
+            let tabId = `tab-${modName}`;
+            if (modName.startsWith('agent-')) {
+                tabId = `tab-agent-${modName.split('-')[1]}`;
+            }
+            const activeTab = document.getElementById(tabId);
+            if (activeTab) activeTab.classList.add('active');
             
             // Toggle control panel buttons
             document.querySelectorAll('.view-actions').forEach(a => a.style.display = 'none');
-            const actionDiv = document.getElementById(`${modName}-actions`);
+            let actionId = `${modName}-actions`;
+            if (modName.startsWith('agent-')) {
+                actionId = 'agent-actions';
+            }
+            const actionDiv = document.getElementById(actionId);
             if (actionDiv) actionDiv.style.display = 'flex';
 
             // Special actions for wiki
@@ -2467,6 +2720,378 @@
                         </table>
                     `;
                 } catch (e) { console.error(e); }
+            } else if (activeSettingsPanel === 'credentials') {
+                if (!selectedCompanyId) {
+                    container.innerHTML = `<h4>Por favor, seleccione una empresa activa antes de configurar credenciales.</h4>`;
+                    return;
+                }
+                try {
+                    const res = await fetch(`${apiBaseUrl}/api/empresas/${selectedCompanyId}/credenciales`);
+                    const creds = await res.json();
+                    let rows = '';
+                    creds.forEach(cr => {
+                        rows += `
+                            <tr>
+                                <td>${cr.id}</td>
+                                <td><strong>${cr.nombre}</strong></td>
+                                <td><code>${cr.proveedor}</code></td>
+                                <td><code>••••••••</code></td>
+                                <td><span style="color:${cr.activo ? 'green':'red'}">${cr.activo ? 'Activo':'Inactivo'}</span></td>
+                                <td>
+                                    <button class="btn btn-danger" style="padding:3px 6px; font-size:11px;" onclick="deleteCredential(${cr.id})">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    container.innerHTML = `
+                        <div class="settings-section-title">Credenciales de API de la Empresa</div>
+                        <table class="crud-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Proveedor</th>
+                                    <th>Valor</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows || '<tr><td colspan="6">No hay credenciales creadas para esta empresa.</td></tr>'}</tbody>
+                        </table>
+                    `;
+                } catch (e) { console.error(e); }
+            }
+        }
+
+        // 9. Agent Workspace Lifecycle & Realtime Chat
+        function openAgentWorkspace(agentId, agentName) {
+            let tab = document.getElementById(`tab-agent-${agentId}`);
+            if (!tab) {
+                const tabContainer = document.getElementById('workspace-tab-bar');
+                tab = document.createElement('div');
+                tab.id = `tab-agent-${agentId}`;
+                tab.className = 'workspace-tab';
+                tab.onclick = () => switchModule(`agent-${agentId}`);
+                tab.innerHTML = `
+                    <i class="fa-solid fa-robot"></i>
+                    <span>${agentName}</span>
+                    <span class="close-tab" onclick="event.stopPropagation(); closeAgentWorkspace(${agentId})">&times;</span>
+                `;
+                tabContainer.appendChild(tab);
+
+                // Create the viewport
+                const moduleContainer = document.createElement('div');
+                moduleContainer.id = `module-agent-${agentId}`;
+                moduleContainer.className = 'module-viewport';
+                moduleContainer.innerHTML = `
+                    <div class="agent-workspace-layout">
+                        <!-- Chat Section -->
+                        <div class="agent-chat-section">
+                            <div class="column-header" style="border-bottom: 1px solid var(--border-color); background-color: var(--bg-white);">
+                                <span>Conversación con ${agentName}</span>
+                                <span class="agent-status-indicator" id="agent-status-${agentId}">Estado: Desconectado</span>
+                            </div>
+                            <div class="agent-chat-messages" id="agent-chat-messages-${agentId}">
+                                <!-- Chat history populated here -->
+                            </div>
+                            <div class="agent-chat-input-area">
+                                <textarea id="agent-chat-input-${agentId}" placeholder="Escribe un mensaje para ${agentName}..." onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); sendAgentChatMessage(${agentId}); }"></textarea>
+                                <button class="btn" onclick="sendAgentChatMessage(${agentId})">
+                                    <i class="fa-solid fa-paper-plane"></i> Enviar
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Settings / Profile Section -->
+                        <div class="agent-profile-section">
+                            <div class="agent-profile-card">
+                                <h4 style="margin-bottom:12px; color:var(--odoo-primary); font-size:14px;"><i class="fa-solid fa-gears"></i> Parámetros del Agente</h4>
+                                <div class="form-group">
+                                    <label>Nombre del Agente</label>
+                                    <input type="text" id="agent-profile-name-${agentId}" style="font-size:12px;">
+                                </div>
+                                <div class="form-group">
+                                    <label>Prompt del Sistema / Rol</label>
+                                    <textarea id="agent-profile-rol-${agentId}" rows="6" style="font-size:12px; resize:vertical;"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Habilidades</label>
+                                    <input type="text" id="agent-profile-skills-${agentId}" placeholder="Ej: Búsqueda web, análisis de datos" style="font-size:12px;">
+                                </div>
+                                <div class="form-group">
+                                    <label>Objetivos</label>
+                                    <input type="text" id="agent-profile-objectives-${agentId}" placeholder="Ej: Responder dudas, automatizar tareas" style="font-size:12px;">
+                                </div>
+                            </div>
+                            
+                            <div class="agent-profile-card">
+                                <h4 style="margin-bottom:12px; color:var(--odoo-primary); font-size:14px;"><i class="fa-solid fa-microchip"></i> Configuración de LLM</h4>
+                                <div class="form-group">
+                                    <label>Proveedor de LLM</label>
+                                    <select id="agent-profile-provider-${agentId}" onchange="updateModelSelectOptions(${agentId})" style="font-size:12px;">
+                                        <option value="google">Google Gemini</option>
+                                        <option value="openrouter">OpenRouter</option>
+                                        <option value="hermes">Hermes (Local VPS)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Modelo Específico</label>
+                                    <select id="agent-profile-model-${agentId}" style="font-size:12px;">
+                                        <!-- Populated dynamically based on provider -->
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Asociar Nota de Obsidian (Conocimiento)</label>
+                                    <select id="agent-profile-knowledge-${agentId}" style="font-size:12px;">
+                                        <!-- Filled with company notes -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Find module-ajustes viewport and insert new viewport after it
+                const ajustesViewport = document.getElementById('module-ajustes');
+                ajustesViewport.parentNode.insertBefore(moduleContainer, ajustesViewport.nextSibling);
+            }
+
+            // Switch to the newly opened or existing tab/viewport
+            switchModule(`agent-${agentId}`);
+
+            // Load agent details
+            loadAgentProfileData(agentId);
+            // Load chat history
+            loadAgentChatHistory(agentId);
+        }
+
+        function closeAgentWorkspace(agentId) {
+            const tab = document.getElementById(`tab-agent-${agentId}`);
+            const viewport = document.getElementById(`module-agent-${agentId}`);
+            if (tab) tab.remove();
+            if (viewport) viewport.remove();
+
+            if (activeModule === `agent-${agentId}`) {
+                switchModule('tablero');
+            }
+        }
+
+        function updateModelSelectOptions(agentId, selectedModel = null) {
+            const providerSelect = document.getElementById(`agent-profile-provider-${agentId}`);
+            const modelSelect = document.getElementById(`agent-profile-model-${agentId}`);
+            if (!providerSelect || !modelSelect) return;
+
+            const provider = providerSelect.value;
+            modelSelect.innerHTML = '';
+
+            let models = [];
+            if (provider === 'google') {
+                models = [
+                    { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash' },
+                    { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' }
+                ];
+            } else if (provider === 'openrouter') {
+                models = [
+                    { value: 'google/gemini-flash-1.5', label: 'Gemini 1.5 Flash (via OpenRouter)' },
+                    { value: 'meta-llama/llama-3-8b-instruct:free', label: 'Llama 3 8B Instruct (Free)' },
+                    { value: 'mistralai/mistral-7b-instruct:free', label: 'Mistral 7B Instruct (Free)' }
+                ];
+            } else if (provider === 'hermes') {
+                models = [
+                    { value: 'hermes-model-1', label: 'Hermes Manager Default' }
+                ];
+            }
+
+            models.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.value;
+                opt.textContent = m.label;
+                if (selectedModel && selectedModel === m.value) {
+                    opt.selected = true;
+                }
+                modelSelect.appendChild(opt);
+            });
+        }
+
+        async function loadAgentProfileData(agentId) {
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/agentes/${agentId}`);
+                if (!res.ok) return;
+                const agent = await res.json();
+
+                // Fill simple fields
+                document.getElementById(`agent-profile-name-${agentId}`).value = agent.nombre || '';
+                document.getElementById(`agent-profile-rol-${agentId}`).value = agent.rol_prompt || '';
+                document.getElementById(`agent-profile-skills-${agentId}`).value = agent.habilidades || '';
+                document.getElementById(`agent-profile-objectives-${agentId}`).value = agent.objetivos || '';
+
+                // Load note select options
+                const notesRes = await fetch(`${apiBaseUrl}/api/empresas/${selectedCompanyId}/notas`);
+                const notes = await notesRes.json();
+                const noteSelect = document.getElementById(`agent-profile-knowledge-${agentId}`);
+                noteSelect.innerHTML = '<option value="">Ninguna Nota</option>';
+                
+                let currentKnowledge = [];
+                if (agent.conocimientos) {
+                    try {
+                        currentKnowledge = JSON.parse(agent.conocimientos);
+                    } catch(e) {
+                        currentKnowledge = [];
+                    }
+                }
+
+                notes.forEach(note => {
+                    const opt = document.createElement('option');
+                    opt.value = note.titulo;
+                    opt.textContent = note.titulo;
+                    if (currentKnowledge.includes(note.titulo)) {
+                        opt.selected = true;
+                    }
+                    noteSelect.appendChild(opt);
+                });
+
+                // LLM Config parsing
+                let provider = 'google';
+                let model = 'gemini-1.5-flash';
+                if (agent.modelo_config) {
+                    try {
+                        const cfg = JSON.parse(agent.modelo_config);
+                        provider = cfg.provider || 'google';
+                        model = cfg.model || 'gemini-1.5-flash';
+                    } catch(e) {}
+                }
+
+                document.getElementById(`agent-profile-provider-${agentId}`).value = provider;
+                updateModelSelectOptions(agentId, model);
+
+                // Update status indicator
+                updateAgentStatusUI(agentId, agent.status, agent.tarea_actual);
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        async function saveActiveAgentConfig() {
+            if (!activeModule.startsWith('agent-')) return;
+            const agentId = parseInt(activeModule.split('-')[1]);
+
+            const name = document.getElementById(`agent-profile-name-${agentId}`).value.trim();
+            const rol = document.getElementById(`agent-profile-rol-${agentId}`).value;
+            const skills = document.getElementById(`agent-profile-skills-${agentId}`).value;
+            const objectives = document.getElementById(`agent-profile-objectives-${agentId}`).value;
+            const provider = document.getElementById(`agent-profile-provider-${agentId}`).value;
+            const model = document.getElementById(`agent-profile-model-${agentId}`).value;
+            const knowledgeSelect = document.getElementById(`agent-profile-knowledge-${agentId}`);
+            
+            const selectedNotes = [];
+            if (knowledgeSelect.value) {
+                selectedNotes.push(knowledgeSelect.value);
+            }
+
+            const modelConfig = JSON.stringify({
+                provider: provider,
+                model: model,
+                use_free_only: true
+            });
+
+            try {
+                const fetchRes = await fetch(`${apiBaseUrl}/api/agentes/${agentId}`);
+                if (!fetchRes.ok) return;
+                const origAgent = await fetchRes.json();
+
+                const payload = {
+                    empresa_id: selectedCompanyId,
+                    nombre: name,
+                    rol_prompt: rol,
+                    habilidades: skills,
+                    objetivos: objectives,
+                    modelo_config: modelConfig,
+                    conocimientos: JSON.stringify(selectedNotes),
+                    status: origAgent.status,
+                    tarea_actual: origAgent.tarea_actual
+                };
+
+                const res = await fetch(`${apiBaseUrl}/api/agentes/${agentId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    addSystemLog(`Configuración de agente '${name}' guardada correctamente.`, 'success');
+                    await loadAgentsAndTasks();
+                } else {
+                    alert("Error al guardar la configuración del agente.");
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        async function loadAgentChatHistory(agentId) {
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/agentes/${agentId}/chat`);
+                if (!res.ok) return;
+                const messages = await res.json();
+
+                const container = document.getElementById(`agent-chat-messages-${agentId}`);
+                container.innerHTML = '';
+                messages.forEach(msg => {
+                    const bubble = document.createElement('div');
+                    bubble.className = `agent-chat-bubble ${msg.remitente === 'agente' ? 'agent' : 'user'}`;
+                    bubble.textContent = msg.contenido;
+                    container.appendChild(bubble);
+                });
+                container.scrollTop = container.scrollHeight;
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        async function sendAgentChatMessage(agentId) {
+            const inputEl = document.getElementById(`agent-chat-input-${agentId}`);
+            if (!inputEl) return;
+            const content = inputEl.value.trim();
+            if (!content) return;
+
+            inputEl.value = '';
+
+            const container = document.getElementById(`agent-chat-messages-${agentId}`);
+            const userBubble = document.createElement('div');
+            userBubble.className = 'agent-chat-bubble user';
+            userBubble.textContent = content;
+            container.appendChild(userBubble);
+            container.scrollTop = container.scrollHeight;
+
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/agentes/${agentId}/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        usuario_id: 1,
+                        remitente: 'usuario',
+                        contenido: content
+                    })
+                });
+                if (!res.ok) {
+                    addSystemLog("Error al enviar mensaje de chat.", "error");
+                }
+            } catch(e) {
+                console.error(e);
+                addSystemLog("Error de red al chatear con el agente.", "error");
+            }
+        }
+
+        function updateAgentStatusUI(agentId, status, tareaActual) {
+            const indicator = document.getElementById(`agent-status-${agentId}`);
+            if (!indicator) return;
+            if (status === 1) {
+                indicator.innerHTML = `<span style="color:var(--status-working); font-weight:600;"><i class="fa-solid fa-spinner fa-spin"></i> Pensando... (${tareaActual || ''})</span>`;
+            } else {
+                indicator.innerHTML = `<span style="color:var(--status-idle); font-weight:500;"><i class="fa-solid fa-circle-check"></i> En Espera</span>`;
             }
         }
 
@@ -2477,7 +3102,62 @@
                 openModal('modal-ajustes-group');
             } else if (activeSettingsPanel === 'companies') {
                 openModal('modal-company');
+            } else if (activeSettingsPanel === 'credentials') {
+                openModal('modal-ajustes-credential');
             }
+        }
+
+        async function submitCreateCredential() {
+            const name = document.getElementById('cred-name-input').value.trim();
+            const provider = document.getElementById('cred-provider-select').value;
+            const value = document.getElementById('cred-value-input').value.trim();
+            const endpoint = document.getElementById('cred-endpoint-input').value.trim();
+
+            if (!name || !value) {
+                alert("Por favor rellene el nombre y valor de la credencial.");
+                return;
+            }
+
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/credenciales`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        empresa_id: selectedCompanyId,
+                        nombre: name,
+                        proveedor: provider,
+                        credencial_valor: value,
+                        url_endpoint: endpoint || null,
+                        config_json: null,
+                        activo: true
+                    })
+                });
+                if (res.ok) {
+                    closeModal('modal-ajustes-credential');
+                    document.getElementById('cred-name-input').value = '';
+                    document.getElementById('cred-value-input').value = '';
+                    document.getElementById('cred-endpoint-input').value = '';
+                    await loadSettingsPanelData();
+                } else {
+                    const err = await res.json();
+                    alert(err.detail);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function deleteCredential(id) {
+            if (!confirm("¿Está seguro de eliminar esta credencial?")) return;
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/credenciales/${id}`, {
+                    method: 'DELETE'
+                });
+                if (res.ok) {
+                    await loadSettingsPanelData();
+                } else {
+                    const err = await res.json();
+                    alert(err.detail);
+                }
+            } catch (e) { console.error(e); }
         }
 
         async function submitCreateUser() {
@@ -2654,6 +3334,69 @@
                 }
             } catch (e) {
                 console.error(e);
+            }
+        }
+
+        async function runNotebookLMSearch() {
+            const queryVal = document.getElementById('notebooklm-query').value.trim();
+            if (!queryVal) return;
+            if (!selectedCompanyId) {
+                alert("Por favor, seleccione una empresa activa.");
+                return;
+            }
+
+            const statusEl = document.getElementById('notebooklm-status');
+            statusEl.style.display = 'block';
+
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/knowledge/notebooklm/search`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ empresa_id: selectedCompanyId, query: queryVal })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('wiki-note-title-input').value = data.titulo;
+                    document.getElementById('wiki-note-editor-textarea').value = data.contenido;
+                    updateWikiPreview();
+                    document.getElementById('notebooklm-query').value = '';
+                } else {
+                    const err = await res.json();
+                    alert("Error en NotebookLM: " + err.detail);
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Error de red al conectar con NotebookLM.");
+            } finally {
+                statusEl.style.display = 'none';
+            }
+        }
+
+        async function exportWikiVault() {
+            if (!selectedCompanyId) {
+                alert("Por favor seleccione una empresa activa.");
+                return;
+            }
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/empresas/${selectedCompanyId}/wiki/export`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `wiki-vault-empresa-${selectedCompanyId}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    alert("Error al exportar la Wiki.");
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Error al exportar.");
             }
         }
 

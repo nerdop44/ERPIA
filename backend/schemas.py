@@ -38,6 +38,12 @@ class AgenteBase(BaseModel):
     rol_prompt: Optional[str] = None
     status: Optional[int] = Field(0)
     tarea_actual: Optional[str] = None
+    habilidades: Optional[str] = None
+    objetivos: Optional[str] = None
+    recursos: Optional[str] = None
+    conocimientos: Optional[str] = None
+    herramientas: Optional[str] = None
+    modelo_config: Optional[str] = None
 
 class AgenteCreate(AgenteBase):
     empresa_id: int
@@ -151,6 +157,42 @@ class NotaResponse(NotaBase):
     id: int
     empresa_id: int
     fecha_actualizacion: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class CredencialApiBase(BaseModel):
+    nombre: str = Field(..., max_length=100)
+    proveedor: str = Field(..., max_length=50)
+    credencial_valor: str
+    url_endpoint: Optional[str] = None
+    config_json: Optional[str] = None
+    activo: Optional[bool] = True
+
+class CredencialApiCreate(CredencialApiBase):
+    empresa_id: int
+
+class CredencialApiResponse(CredencialApiBase):
+    id: int
+    empresa_id: int
+
+    class Config:
+        from_attributes = True
+
+
+class MensajeChatBase(BaseModel):
+    remitente: str = Field(..., max_length=50)
+    contenido: str
+
+class MensajeChatCreate(MensajeChatBase):
+    usuario_id: Optional[int] = None
+
+class MensajeChatResponse(MensajeChatBase):
+    id: int
+    agente_id: int
+    usuario_id: Optional[int] = None
+    timestamp: datetime
 
     class Config:
         from_attributes = True

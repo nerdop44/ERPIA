@@ -27,3 +27,9 @@
    - Integración en el frontend de la pantalla de login persistente, menú de App Switcher, modo oscuro global, barras laterales redimensionables y el visualizador de grafo interactivo en Canvas (fuerza dirigida).
    - Despliegue de los cambios en el repositorio de GitHub y sincronización en producción en el VPS mediante reconstrucción de contenedores y siembra de base de datos en caliente.
    - Verificación funcional exitosa en el puerto 8000 del VPS con registro de capturas en el walkthrough.
+
+4. **[2026-06-06] Implementación de la Fase 3 (Pestañas Multitarea, Chat de Agente y Gestión de Credenciales):**
+   - Integrado el modal y la lógica CRUD (listar, crear, eliminar) para la gestión de credenciales API (Gemini/OpenRouter/Local VPS) por empresa asociada en Ajustes.
+   - Implementado el buscador de NotebookLM y la exportación de la Wiki en formato Markdown unificado.
+   - Diseñada e implementada la lógica de instanciación dinámica de pestañas de trabajo independientes por cada agente en la barra superior del espacio de trabajo.
+   - Creado el panel de chat interactivo y el editor de parámetros/configuración del LLM para cada agente, sincronizado en tiempo real por WebSockets.

@@ -39,10 +39,57 @@ class Agente(Base):
     rol_prompt = Column(Text, nullable=True)
     status = Column(Integer, default=0)
     tarea_actual = Column(String(255), nullable=True)
+    
+    # Campos adicionales Fase 3
+    habilidades = Column(Text, nullable=True)
+    objetivos = Column(Text, nullable=True)
+    recursos = Column(Text, nullable=True)
+    conocimientos = Column(Text, nullable=True)
+    herramientas = Column(Text, nullable=True)
+    modelo_config = Column(Text, nullable=True)
 
     empresa = relationship("Empresa", back_populates="agentes")
     tareas = relationship("TareaKanban", back_populates="agente", cascade="all, delete-orphan")
     logs = relationship("LogAuditoria", back_populates="agente", cascade="all, delete-orphan")
+    mensajes = relationship("MensajeChat", back_populates="agente", cascade="all, delete-orphan")
+    credenciales = relationship("CredencialApi", secondary="agente_credencial", back_populates="agentes")
+
+
+class AgenteCredencial(Base):
+    __tablename__ = "agente_credencial"
+    
+    agente_id = Column(Integer, ForeignKey("agentes.id", ondelete="CASCADE"), primary_key=True)
+    credencial_id = Column(Integer, ForeignKey("credenciales_api.id", ondelete="CASCADE"), primary_key=True)
+
+
+class CredencialApi(Base):
+    __tablename__ = "credenciales_api"
+
+    id = Column(Integer, primary_key=True, index=True)
+    empresa_id = Column(Integer, ForeignKey("empresas.id", ondelete="CASCADE"), nullable=False)
+    nombre = Column(String(100), nullable=False)
+    proveedor = Column(String(50), nullable=False)  # google, openrouter, openai, mcp_server, custom_skill
+    credencial_valor = Column(Text, nullable=False)
+    url_endpoint = Column(String(255), nullable=True)
+    config_json = Column(Text, nullable=True)
+    activo = Column(Boolean, default=True)
+
+    empresa = relationship("Empresa")
+    agentes = relationship("Agente", secondary="agente_credencial", back_populates="credenciales")
+
+
+class MensajeChat(Base):
+    __tablename__ = "mensajes_chat"
+
+    id = Column(Integer, primary_key=True, index=True)
+    agente_id = Column(Integer, ForeignKey("agentes.id", ondelete="CASCADE"), nullable=False)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id", ondelete="SET NULL"), nullable=True)
+    remitente = Column(String(50), nullable=False)  # usuario, agente, sistema
+    contenido = Column(Text, nullable=False)
+    timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+
+    agente = relationship("Agente", back_populates="mensajes")
+    usuario = relationship("Usuario")
 
 
 class TareaKanban(Base):
