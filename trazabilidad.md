@@ -20,3 +20,10 @@
    - Añadida la dependencia `websockets` en `backend/requirements.txt` para corregir la falta de soporte de WebSocket de Uvicorn.
    - Modificación del script `runner.py` para limpiar automáticamente los datos antiguos (Empresa Demo S.A.) durante la siembra.
    - Despliegue, reconstrucción y verificación exitosa de la interfaz y WebSockets en tiempo real en el puerto :8000 del VPS.
+
+3. **[2026-06-06] Implementación Completa de la Fase 2 (Auth, Ajustes y Obsidian Wiki):**
+   - Incorporación de los modelos avanzados de Base de Datos para Usuarios, Grupos y Notas de la Wiki en PostgreSQL.
+   - Implementación de los endpoints REST en FastAPI para login con token, CRUD de usuarios/grupos y guardado de notas.
+   - Integración en el frontend de la pantalla de login persistente, menú de App Switcher, modo oscuro global, barras laterales redimensionables y el visualizador de grafo interactivo en Canvas (fuerza dirigida).
+   - Despliegue de los cambios en el repositorio de GitHub y sincronización en producción en el VPS mediante reconstrucción de contenedores y siembra de base de datos en caliente.
+   - Verificación funcional exitosa en el puerto 8000 del VPS con registro de capturas en el walkthrough.
