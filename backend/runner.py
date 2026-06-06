@@ -15,9 +15,17 @@ def get_db():
 def create_mock_data():
     db = get_db()
     try:
-        empresa = db.query(models.Empresa).filter(models.Empresa.nombre == "Empresa Demo S.A.").first()
+        # Limpiar datos demo anteriores no deseados (como Empresa Demo S.A.)
+        old_empresas = db.query(models.Empresa).filter(models.Empresa.nombre != "VenridesCafé").all()
+        if old_empresas:
+            for old_emp in old_empresas:
+                print(f"[-] Eliminando datos demo antiguos de: {old_emp.nombre}")
+                db.delete(old_emp)
+            db.commit()
+
+        empresa = db.query(models.Empresa).filter(models.Empresa.nombre == "VenridesCafé").first()
         if not empresa:
-            empresa = models.Empresa(nombre="Empresa Demo S.A.", activo=True)
+            empresa = models.Empresa(nombre="VenridesCafé", activo=True)
             db.add(empresa)
             db.commit()
             db.refresh(empresa)
@@ -27,7 +35,9 @@ def create_mock_data():
 
         configs = [
             ("HERMES_API_URL", "http://hermes:8080/v1", "API"),
-            ("ODOO_URL", "https://odoo.venrides.com", "API"),
+            ("ODOO_URL", "https://cafe.venrides.com", "API"),
+            ("ODOO_DB", "vencafedb", "API"),
+            ("ODOO_API_KEY", "531b6891e88ad09cbb2343eb73c2f2f398ff5ef0", "API"),
             ("N8N_WEBHOOK_URL", "http://n8n:5678/webhook/agent-trigger", "API"),
             ("CONSOLIDACION_SEMANAL", "0 18 * * 5", "CRON")
         ]
@@ -42,20 +52,78 @@ def create_mock_data():
                 print(f"[+] Configuración creada: {clave} = {valor}")
         db.commit()
 
-        agentes = [
-            ("Agente Administrativo", "Gestionar conciliaciones bancarias y pagos en Odoo.", 0),
-            ("Agente de Marketing", "Redacción de copys semanales y publicación de anuncios.", 0),
-            ("Agente de Soporte", "Monitoreo del buzón de soporte técnico y respuestas automatizadas.", 0)
+        agentes_def = [
+            ("Agente Administrativo", "Responsable de la integración de Odoo, conciliaciones, facturación y reportes financieros.", 0, ""),
+            ("Agente de Marketing", "Manejo de campañas, Telegram bot, Live-Chat y contenido de redes sociales para VenridesCafé.", 0, ""),
+            ("Agente de Operaciones", "Gestión de checklists de negocio, auditoría de procesos, watchdog de cuota y tareas de soporte.", 1, "Verificar token Google")
         ]
-        for nombre, rol, status in agentes:
+        
+        agentes_map = {}
+        for nombre, rol, status, tarea_act in agentes_def:
             ex_agente = db.query(models.Agente).filter(
                 models.Agente.empresa_id == empresa.id,
                 models.Agente.nombre == nombre
             ).first()
             if not ex_agente:
-                new_agente = models.Agente(empresa_id=empresa.id, nombre=nombre, rol_prompt=rol, status=status)
-                db.add(new_agente)
+                ex_agente = models.Agente(empresa_id=empresa.id, nombre=nombre, rol_prompt=rol, status=status, tarea_actual=tarea_act)
+                db.add(ex_agente)
+                db.commit()
+                db.refresh(ex_agente)
                 print(f"[+] Agente creado: {nombre}")
+            else:
+                ex_agente.status = status
+                ex_agente.tarea_actual = tarea_act
+                db.commit()
+            agentes_map[nombre] = ex_agente.id
+        
+        # Tareas iniciales de Hermes
+        tareas_def = [
+            ("Verificar estado de Odoo", "Validar conexión XML-RPC al servidor de Odoo en cafe.venrides.com.", "Hecho", "Agente Administrativo"),
+            ("Verificar token Google", "Validar acceso a token Google en /opt/data/google_test.py.", "Progreso", "Agente de Operaciones"),
+            ("Obtener metadatos Gmail", "Recuperar últimos 5 correos con detalles de Gmail (requiere aprobación por scopes).", "Aprobacion", "Agente de Operaciones"),
+            ("Planificación Calendario Semanal", "Generar copys y calendario de contenido para redes sociales.", "Pendiente", "Agente de Marketing"),
+            ("Generar informe de recuperación", "Crea reporte cuando se recupera la cuota del API.", "Pendiente", "Agente de Operaciones")
+        ]
+
+        for titulo, desc, estado, agente_name in tareas_def:
+            agente_id = agentes_map.get(agente_name)
+            ex_tarea = db.query(models.TareaKanban).filter(
+                models.TareaKanban.empresa_id == empresa.id,
+                models.TareaKanban.titulo == titulo
+            ).first()
+            if not ex_tarea:
+                new_tarea = models.TareaKanban(
+                    empresa_id=empresa.id,
+                    agente_id=agente_id,
+                    titulo=titulo,
+                    descripcion=desc,
+                    estado=estado
+                )
+                db.add(new_tarea)
+                print(f"[+] Tarea creada: {titulo} ({estado})")
+        db.commit()
+
+        # Logs iniciales
+        logs_def = [
+            (None, "[SISTEMA] Canal de comunicación establecido con el gateway principal Hermes."),
+            ("Agente Administrativo", "[ÉXITO] Conexión establecida con Odoo v18 (DB: vencafedb). Estado del servidor: OK."),
+            ("Agente de Operaciones", "Iniciando verificación del token de Google en el sandbox (/opt/data/google_test.py)."),
+            ("Agente de Operaciones", "[ATENCIÓN] Error de permisos: el token carece del scope 'gmail.readonly'. Requiere aprobación para regenerar token.")
+        ]
+        
+        for agente_name, mensaje in logs_def:
+            agente_id = agentes_map.get(agente_name) if agente_name else None
+            ex_log = db.query(models.LogAuditoria).filter(
+                models.LogAuditoria.empresa_id == empresa.id,
+                models.LogAuditoria.mensaje == mensaje
+            ).first()
+            if not ex_log:
+                new_log = models.LogAuditoria(
+                    empresa_id=empresa.id,
+                    agente_id=agente_id,
+                    mensaje=mensaje
+                )
+                db.add(new_log)
         db.commit()
 
         print("[✓] Carga de datos demo completada con éxito.")
