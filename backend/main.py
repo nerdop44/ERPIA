@@ -412,6 +412,30 @@ def create_usuario(user: schemas.UsuarioCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
+@app.put("/api/usuarios/{id}", response_model=schemas.UsuarioResponse)
+def update_usuario(id: int, payload: schemas.UsuarioUpdate, db: Session = Depends(get_db)):
+    user = db.query(models.Usuario).filter(models.Usuario.id == id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado.")
+    if payload.username is not None:
+        existing = db.query(models.Usuario).filter(models.Usuario.username == payload.username, models.Usuario.id != id).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="El nombre de usuario ya está en uso.")
+        user.username = payload.username
+    if payload.full_name is not None:
+        user.full_name = payload.full_name
+    if payload.activo is not None:
+        user.activo = payload.activo
+    if payload.grupo_id is not None:
+        user.grupo_id = payload.grupo_id
+    if payload.password:
+        user.hashed_password = hashlib.sha256(payload.password.encode()).hexdigest()
+    if payload.canales_personales is not None:
+        user.canales_personales = payload.canales_personales
+    db.commit()
+    db.refresh(user)
+    return user
+
 @app.delete("/api/usuarios/{id}")
 def delete_usuario(id: int, db: Session = Depends(get_db)):
     user = db.query(models.Usuario).filter(models.Usuario.id == id).first()
@@ -436,6 +460,24 @@ def create_grupo(grupo: schemas.GrupoCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_grupo)
     return new_grupo
+
+@app.put("/api/grupos/{id}", response_model=schemas.GrupoResponse)
+def update_grupo(id: int, payload: schemas.GrupoUpdate, db: Session = Depends(get_db)):
+    grupo = db.query(models.Grupo).filter(models.Grupo.id == id).first()
+    if not grupo:
+        raise HTTPException(status_code=404, detail="Grupo no encontrado.")
+    if payload.nombre is not None:
+        existing = db.query(models.Grupo).filter(models.Grupo.nombre == payload.nombre, models.Grupo.id != id).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="El nombre del grupo ya existe.")
+        grupo.nombre = payload.nombre
+    if payload.permisos is not None:
+        grupo.permisos = payload.permisos
+    if payload.es_admin is not None:
+        grupo.es_admin = payload.es_admin
+    db.commit()
+    db.refresh(grupo)
+    return grupo
 
 @app.delete("/api/grupos/{id}")
 def delete_grupo(id: int, db: Session = Depends(get_db)):
@@ -894,6 +936,31 @@ def export_wiki_vault(empresa_id: int, db: Session = Depends(get_db)):
 # =====================================================================
 # FASE 4 — PERFIL RICO DE EMPRESA
 # =====================================================================
+
+@app.put("/api/empresas/{id}", response_model=schemas.EmpresaResponse)
+def update_empresa(id: int, payload: schemas.EmpresaUpdate, db: Session = Depends(get_db)):
+    empresa = db.query(models.Empresa).filter(models.Empresa.id == id).first()
+    if not empresa:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada.")
+    if payload.nombre is not None:
+        existing = db.query(models.Empresa).filter(models.Empresa.nombre == payload.nombre, models.Empresa.id != id).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="El nombre de la empresa ya existe.")
+        empresa.nombre = payload.nombre
+    if payload.activo is not None:
+        empresa.activo = payload.activo
+    db.commit()
+    db.refresh(empresa)
+    return empresa
+
+@app.delete("/api/empresas/{id}")
+def delete_empresa(id: int, db: Session = Depends(get_db)):
+    empresa = db.query(models.Empresa).filter(models.Empresa.id == id).first()
+    if not empresa:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada.")
+    db.delete(empresa)
+    db.commit()
+    return {"message": "Empresa eliminada correctamente."}
 
 @app.get("/api/empresas/{id}/perfil", response_model=schemas.EmpresaPerfilResponse)
 def get_empresa_perfil(id: int, db: Session = Depends(get_db)):

@@ -1978,6 +1978,9 @@
                     <div class="settings-menu-item" id="menu-credentials" onclick="switchSettingsPanel('credentials')">
                         <i class="fa-solid fa-key" style="margin-right:10px;"></i>Credenciales API
                     </div>
+                    <div class="settings-menu-item" id="menu-tools-catalog" onclick="switchSettingsPanel('tools-catalog')">
+                        <i class="fa-solid fa-puzzle-piece" style="margin-right:10px;"></i>Catálogo de Tools
+                    </div>
                 </div>
                 <div class="settings-content">
                     <!-- Dynamic adjustments panel container -->
@@ -2208,14 +2211,15 @@
         </div>
     </div>
 
-    <!-- Modal Ajustes: Crear Usuario -->
+    <!-- Modal Ajustes: Crear/Editar Usuario -->
     <div id="modal-ajustes-user" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <span class="modal-title">Registrar Nuevo Usuario</span>
+                <span class="modal-title" id="modal-user-title">Registrar Nuevo Usuario</span>
                 <button class="close-modal" onclick="closeModal('modal-ajustes-user')">&times;</button>
             </div>
             <div class="modal-body">
+                <input type="hidden" id="user-edit-id">
                 <div class="form-group">
                     <label for="user-username-input">Usuario (Username)</label>
                     <input type="text" id="user-username-input" placeholder="Ej: operador2">
@@ -2226,28 +2230,34 @@
                 </div>
                 <div class="form-group">
                     <label for="user-password-input">Contraseña</label>
-                    <input type="password" id="user-password-input" placeholder="Contraseña">
+                    <input type="password" id="user-password-input" placeholder="Dejar vacío para mantener">
                 </div>
                 <div class="form-group">
                     <label for="user-group-select">Grupo / Rol</label>
                     <select id="user-group-select"></select>
                 </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="user-activo-check" checked> Activo
+                    </label>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('modal-ajustes-user')">Descartar</button>
-                <button class="btn" onclick="submitCreateUser()">Crear Usuario</button>
+                <button class="btn" onclick="submitCreateUser()">Guardar</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal Ajustes: Crear Grupo -->
+    <!-- Modal Ajustes: Crear/Editar Grupo -->
     <div id="modal-ajustes-group" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <span class="modal-title">Crear Nuevo Grupo</span>
+                <span class="modal-title" id="modal-group-title">Crear Nuevo Grupo</span>
                 <button class="close-modal" onclick="closeModal('modal-ajustes-group')">&times;</button>
             </div>
             <div class="modal-body">
+                <input type="hidden" id="group-edit-id">
                 <div class="form-group">
                     <label for="group-name-input">Nombre del Grupo</label>
                     <input type="text" id="group-name-input" placeholder="Ej: Supervisores">
@@ -2256,22 +2266,54 @@
                     <label for="group-permissions-input">Permisos (Formato JSON array)</label>
                     <input type="text" id="group-permissions-input" value='["read", "write"]'>
                 </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="group-es-admin-check"> Grupo Administrador
+                    </label>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('modal-ajustes-group')">Descartar</button>
-                <button class="btn" onclick="submitCreateGroup()">Crear Grupo</button>
+                <button class="btn" onclick="submitCreateGroup()">Guardar</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal Ajustes: Crear Credencial API -->
+    <!-- Modal Ajustes: Crear/Editar Empresa -->
+    <div id="modal-ajustes-company" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title" id="modal-company-title">Registrar Nueva Empresa</span>
+                <button class="close-modal" onclick="closeModal('modal-ajustes-company')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="company-edit-id">
+                <div class="form-group">
+                    <label for="company-name-input">Nombre de la Empresa</label>
+                    <input type="text" id="company-name-input" placeholder="Ej: VenridesCafé S.A.">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="company-activo-check" checked> Activa
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-ajustes-company')">Descartar</button>
+                <button class="btn" onclick="submitCompany()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ajustes: Crear/Editar Credencial API -->
     <div id="modal-ajustes-credential" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <span class="modal-title">Agregar Credencial de API</span>
+                <span class="modal-title" id="modal-cred-title">Agregar Credencial de API</span>
                 <button class="close-modal" onclick="closeModal('modal-ajustes-credential')">&times;</button>
             </div>
             <div class="modal-body">
+                <input type="hidden" id="cred-edit-id">
                 <div class="form-group">
                     <label for="cred-name-input">Nombre de la Credencial</label>
                     <input type="text" id="cred-name-input" placeholder="Ej: Gemini API Key / OpenRouter Key">
@@ -2281,6 +2323,10 @@
                     <select id="cred-provider-select">
                         <option value="google">Google Gemini</option>
                         <option value="openrouter">OpenRouter</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="hermes">Hermes (Local VPS)</option>
+                        <option value="mcp_server">MCP Server</option>
+                        <option value="custom_skill">Custom Skill</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -2291,10 +2337,15 @@
                     <label for="cred-endpoint-input">URL de Endpoint (Opcional)</label>
                     <input type="text" id="cred-endpoint-input" placeholder="Ej: https://generativelanguage.googleapis.com">
                 </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="cred-activo-check" checked> Activo
+                    </label>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('modal-ajustes-credential')">Descartar</button>
-                <button class="btn" onclick="submitCreateCredential()">Agregar Credencial</button>
+                <button class="btn" onclick="submitCreateCredential()">Guardar</button>
             </div>
         </div>
     </div>
@@ -2840,24 +2891,38 @@
 
         // 5. Actions / Submissions
         async function submitCompany() {
+            const editId = document.getElementById('company-edit-id').value;
             const name = document.getElementById('company-name-input').value.trim();
+            const activo = document.getElementById('company-activo-check').checked;
             if (!name) return;
             try {
-                const res = await fetch(`${apiBaseUrl}/api/empresas`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nombre: name, activo: true })
-                });
-                if (res.ok) {
-                    const comp = await res.json();
-                    selectedCompanyId = comp.id;
-                    await loadCompanies();
-                    closeModal('modal-company');
-                    document.getElementById('company-name-input').value = '';
+                let url = `${apiBaseUrl}/api/empresas`;
+                let method = 'POST';
+                let body = { nombre: name, activo };
+
+                if (editId) {
+                    url += `/${editId}`;
+                    method = 'PUT';
                 }
-            } catch (err) {
-                console.error(err);
-            }
+
+                const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                if (res.ok) {
+                    closeModal('modal-ajustes-company');
+                    await loadCompanies();
+                    await loadSettingsPanelData();
+                } else {
+                    const err = await res.json();
+                    alert(err.detail);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function editCompany(id, nombre, activo) {
+            document.getElementById('company-edit-id').value = id;
+            document.getElementById('company-name-input').value = nombre;
+            document.getElementById('company-activo-check').checked = activo;
+            document.getElementById('modal-company-title').innerText = 'Editar Empresa';
+            openModal('modal-ajustes-company');
         }
 
         async function submitConfig() {
@@ -3080,6 +3145,9 @@
                                 <td><span style="color:${u.activo ? 'green':'red'}">${u.activo ? 'Activo':'Inactivo'}</span></td>
                                 <td>${groupName}</td>
                                 <td>
+                                    <button class="btn" style="padding:3px 6px; font-size:11px;" onclick="editUser(${u.id},'${u.username.replace(/'/g, "\\'")}','${(u.full_name||'').replace(/'/g, "\\'")}',${u.activo},${u.grupo_id || 'null'})">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
                                     <button class="btn btn-danger" style="padding:3px 6px; font-size:11px;" onclick="deleteUser(${u.id})">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
@@ -3117,7 +3185,11 @@
                                 <td>${g.id}</td>
                                 <td><strong>${g.nombre}</strong></td>
                                 <td><code>${g.permisos || '[]'}</code></td>
+                                <td>${g.es_admin ? '<span style="color:var(--odoo-primary);font-weight:600;">Admin</span>' : '—'}</td>
                                 <td>
+                                    <button class="btn" style="padding:3px 6px; font-size:11px;" onclick="editGroup(${g.id},'${g.nombre.replace(/'/g, "\\'")}','${(g.permisos||'[]').replace(/'/g, "\\'")}',${g.es_admin || false})">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
                                     <button class="btn btn-danger" style="padding:3px 6px; font-size:11px;" onclick="deleteGroup(${g.id})">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
@@ -3134,10 +3206,11 @@
                                     <th>ID</th>
                                     <th>Nombre del Grupo</th>
                                     <th>Permisos (JSON)</th>
+                                    <th>Admin</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody>${rows || '<tr><td colspan="4">No hay grupos creados.</td></tr>'}</tbody>
+                            <tbody>${rows || '<tr><td colspan="5">No hay grupos creados.</td></tr>'}</tbody>
                         </table>
                     `;
                 } catch (e) { console.error(e); }
@@ -3154,7 +3227,14 @@
                                 <td><strong>${c.nombre}</strong></td>
                                 <td><span style="color:${c.activo ? 'green':'red'}">${c.activo ? 'Activa':'Inactiva'}</span></td>
                                 <td>${new Date(c.fecha_creacion).toLocaleDateString()}</td>
-                                <td>-</td>
+                                <td>
+                                    <button class="btn" style="padding:3px 6px; font-size:11px;" onclick="editCompany(${c.id},'${c.nombre.replace(/'/g, "\\'")}',${c.activo})">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                    <button class="btn btn-danger" style="padding:3px 6px; font-size:11px;" onclick="deleteCompany(${c.id})">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </td>
                             </tr>
                         `;
                     });
@@ -3193,6 +3273,9 @@
                                 <td><code>••••••••</code></td>
                                 <td><span style="color:${cr.activo ? 'green':'red'}">${cr.activo ? 'Activo':'Inactivo'}</span></td>
                                 <td>
+                                    <button class="btn" style="padding:3px 6px; font-size:11px;" onclick="editCredential(${cr.id},'${cr.nombre.replace(/'/g, "\\'")}','${cr.proveedor}','${(cr.url_endpoint||'').replace(/'/g, "\\'")}',${cr.activo})">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
                                     <button class="btn btn-danger" style="padding:3px 6px; font-size:11px;" onclick="deleteCredential(${cr.id})">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
@@ -3217,6 +3300,47 @@
                             <tbody>${rows || '<tr><td colspan="6">No hay credenciales creadas para esta empresa.</td></tr>'}</tbody>
                         </table>
                     `;
+                } catch (e) { console.error(e); }
+            } else if (activeSettingsPanel === 'tools-catalog') {
+                try {
+                    const res = await fetch(`${apiBaseUrl}/api/tools/catalogo`);
+                    const catalog = await res.json();
+                    let html = '<div class="settings-section-title">Catálogo de Tools / Skills / MCPs</div>';
+                    html += '<div style="font-size:12px; color:var(--text-muted); padding:0 15px 15px;">Catálogo estático disponible para asignar a agentes. La gestión dinámica (crear/editar skills personalizados) estará disponible próximamente.</div>';
+
+                    const providers = {
+                        'hermes': { label: 'Hermes (Orquestador)', icon: 'fa-solid fa-robot' },
+                        'google': { label: 'Google Workspace', icon: 'fa-brands fa-google' },
+                        'openrouter': { label: 'OpenRouter', icon: 'fa-solid fa-cloud' },
+                        'mcp': { label: 'MCP Servers', icon: 'fa-solid fa-server' }
+                    };
+
+                    for (const [key, info] of Object.entries(providers)) {
+                        const tools = catalog[key] || [];
+                        if (tools.length === 0) continue;
+                        html += `
+                            <div class="agent-profile-card" style="margin:0 15px 15px;">
+                                <h4 style="color:var(--odoo-primary); font-size:13px; margin-bottom:10px;">
+                                    <i class="${info.icon}"></i> ${info.label}
+                                </h4>
+                                <table class="crud-table" style="font-size:11px;">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nombre</th>
+                                            <th>Descripción</th>
+                                            <th>Requiere Key</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                        `;
+                        tools.forEach(t => {
+                            html += `<tr><td><code>${t.id}</code></td><td><strong>${t.nombre}</strong></td><td>${t.descripcion || '—'}</td><td>${t.requires_key ? 'Sí' : 'No'}</td></tr>`;
+                        });
+                        html += '</tbody></table></div>';
+                    }
+
+                    container.innerHTML = html;
                 } catch (e) { console.error(e); }
             } else if (activeSettingsPanel === 'empresa-perfil') {
                 if (!selectedCompanyId) {
@@ -3874,52 +3998,91 @@
 
         function openAjustesCreateModal() {
             if (activeSettingsPanel === 'users') {
+                document.getElementById('user-edit-id').value = '';
+                document.getElementById('user-username-input').value = '';
+                document.getElementById('user-fullname-input').value = '';
+                document.getElementById('user-password-input').value = '';
+                document.getElementById('user-activo-check').checked = true;
+                document.getElementById('modal-user-title').innerText = 'Registrar Nuevo Usuario';
                 openModal('modal-ajustes-user');
             } else if (activeSettingsPanel === 'groups') {
+                document.getElementById('group-edit-id').value = '';
+                document.getElementById('group-name-input').value = '';
+                document.getElementById('group-permissions-input').value = '["read", "write"]';
+                document.getElementById('group-es-admin-check').checked = false;
+                document.getElementById('modal-group-title').innerText = 'Crear Nuevo Grupo';
                 openModal('modal-ajustes-group');
             } else if (activeSettingsPanel === 'companies') {
-                openModal('modal-company');
+                document.getElementById('company-edit-id').value = '';
+                document.getElementById('company-name-input').value = '';
+                document.getElementById('company-activo-check').checked = true;
+                document.getElementById('modal-company-title').innerText = 'Registrar Nueva Empresa';
+                openModal('modal-ajustes-company');
             } else if (activeSettingsPanel === 'credentials') {
+                document.getElementById('cred-edit-id').value = '';
+                document.getElementById('cred-name-input').value = '';
+                document.getElementById('cred-value-input').value = '';
+                document.getElementById('cred-endpoint-input').value = '';
+                document.getElementById('cred-activo-check').checked = true;
+                document.getElementById('modal-cred-title').innerText = 'Agregar Credencial de API';
                 openModal('modal-ajustes-credential');
             }
         }
 
         async function submitCreateCredential() {
+            const editId = document.getElementById('cred-edit-id').value;
             const name = document.getElementById('cred-name-input').value.trim();
             const provider = document.getElementById('cred-provider-select').value;
             const value = document.getElementById('cred-value-input').value.trim();
             const endpoint = document.getElementById('cred-endpoint-input').value.trim();
+            const activo = document.getElementById('cred-activo-check').checked;
 
-            if (!name || !value) {
-                alert("Por favor rellene el nombre y valor de la credencial.");
+            if (!name) {
+                alert("Por favor rellene el nombre de la credencial.");
                 return;
             }
 
             try {
-                const res = await fetch(`${apiBaseUrl}/api/credenciales`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        empresa_id: selectedCompanyId,
-                        nombre: name,
-                        proveedor: provider,
-                        credencial_valor: value,
-                        url_endpoint: endpoint || null,
-                        config_json: null,
-                        activo: true
-                    })
-                });
+                let url = `${apiBaseUrl}/api/credenciales`;
+                let method = 'POST';
+                let body = {
+                    empresa_id: selectedCompanyId,
+                    nombre: name,
+                    proveedor: provider,
+                    credencial_valor: value || 'placeholder',
+                    url_endpoint: endpoint || null,
+                    config_json: null,
+                    activo
+                };
+
+                if (editId) {
+                    url += `/${editId}`;
+                    method = 'PUT';
+                    if (!value) delete body.credencial_valor;
+                } else {
+                    if (!value) { alert('El valor de la credencial es obligatorio.'); return; }
+                }
+
+                const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
                 if (res.ok) {
                     closeModal('modal-ajustes-credential');
-                    document.getElementById('cred-name-input').value = '';
-                    document.getElementById('cred-value-input').value = '';
-                    document.getElementById('cred-endpoint-input').value = '';
                     await loadSettingsPanelData();
                 } else {
                     const err = await res.json();
                     alert(err.detail);
                 }
             } catch (e) { console.error(e); }
+        }
+
+        function editCredential(id, name, provider, endpoint, activo) {
+            document.getElementById('cred-edit-id').value = id;
+            document.getElementById('cred-name-input').value = name;
+            document.getElementById('cred-provider-select').value = provider;
+            document.getElementById('cred-value-input').value = '';
+            document.getElementById('cred-endpoint-input').value = endpoint || '';
+            document.getElementById('cred-activo-check').checked = activo;
+            document.getElementById('modal-cred-title').innerText = 'Editar Credencial';
+            openModal('modal-ajustes-credential');
         }
 
         async function deleteCredential(id) {
@@ -3938,25 +4101,37 @@
         }
 
         async function submitCreateUser() {
+            const editId = document.getElementById('user-edit-id').value;
             const userIn = document.getElementById('user-username-input').value.trim();
             const nameIn = document.getElementById('user-fullname-input').value.trim();
             const passIn = document.getElementById('user-password-input').value.trim();
             const groupVal = document.getElementById('user-group-select').value;
             const grupo_id = groupVal ? parseInt(groupVal) : null;
+            const activo = document.getElementById('user-activo-check').checked;
 
-            if (!userIn || !passIn) return;
+            if (!userIn) return;
 
             try {
-                const res = await fetch(`${apiBaseUrl}/api/usuarios`, {
-                    method: 'POST',
+                let url = `${apiBaseUrl}/api/usuarios`;
+                let method = 'POST';
+                let body = { username: userIn, full_name: nameIn, activo, grupo_id };
+
+                if (editId) {
+                    url += `/${editId}`;
+                    method = 'PUT';
+                    if (passIn) body.password = passIn;
+                } else {
+                    if (!passIn) { alert('La contraseña es obligatoria para nuevos usuarios.'); return; }
+                    body.password = passIn;
+                }
+
+                const res = await fetch(url, {
+                    method,
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: userIn, full_name: nameIn, password: passIn, activo: true, grupo_id })
+                    body: JSON.stringify(body)
                 });
                 if (res.ok) {
                     closeModal('modal-ajustes-user');
-                    document.getElementById('user-username-input').value = '';
-                    document.getElementById('user-fullname-input').value = '';
-                    document.getElementById('user-password-input').value = '';
                     await loadSettingsPanelData();
                 } else {
                     const err = await res.json();
@@ -3965,27 +4140,61 @@
             } catch (e) { console.error(e); }
         }
 
+        function editUser(id, username, fullName, activo, grupoId) {
+            document.getElementById('user-edit-id').value = id;
+            document.getElementById('user-username-input').value = username;
+            document.getElementById('user-fullname-input').value = fullName || '';
+            document.getElementById('user-password-input').value = '';
+            document.getElementById('user-activo-check').checked = activo;
+            document.getElementById('modal-user-title').innerText = 'Editar Usuario';
+
+            // Set group
+            const groupSelect = document.getElementById('user-group-select');
+            for (let i = 0; i < groupSelect.options.length; i++) {
+                if (groupSelect.options[i].value == grupoId) {
+                    groupSelect.selectedIndex = i;
+                    break;
+                }
+            }
+            openModal('modal-ajustes-user');
+        }
+
         async function submitCreateGroup() {
+            const editId = document.getElementById('group-edit-id').value;
             const nameIn = document.getElementById('group-name-input').value.trim();
             const permIn = document.getElementById('group-permissions-input').value.trim();
+            const esAdmin = document.getElementById('group-es-admin-check').checked;
 
             if (!nameIn) return;
 
             try {
-                const res = await fetch(`${apiBaseUrl}/api/grupos`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nombre: nameIn, permisos: permIn })
-                });
+                let url = `${apiBaseUrl}/api/grupos`;
+                let method = 'POST';
+                let body = { nombre: nameIn, permisos: permIn, es_admin: esAdmin };
+
+                if (editId) {
+                    url += `/${editId}`;
+                    method = 'PUT';
+                }
+
+                const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
                 if (res.ok) {
                     closeModal('modal-ajustes-group');
-                    document.getElementById('group-name-input').value = '';
                     await loadSettingsPanelData();
                 } else {
                     const err = await res.json();
                     alert(err.detail);
                 }
             } catch (e) { console.error(e); }
+        }
+
+        function editGroup(id, nombre, permisos, esAdmin) {
+            document.getElementById('group-edit-id').value = id;
+            document.getElementById('group-name-input').value = nombre;
+            document.getElementById('group-permissions-input').value = permisos || '[]';
+            document.getElementById('group-es-admin-check').checked = esAdmin || false;
+            document.getElementById('modal-group-title').innerText = 'Editar Grupo';
+            openModal('modal-ajustes-group');
         }
 
         async function deleteUser(id) {
@@ -4001,6 +4210,20 @@
             try {
                 await fetch(`${apiBaseUrl}/api/grupos/${id}`, { method: 'DELETE' });
                 await loadSettingsPanelData();
+            } catch (e) { console.error(e); }
+        }
+
+        async function deleteCompany(id) {
+            if (!confirm('¿Está seguro de eliminar esta empresa? Se eliminarán todos sus datos asociados.')) return;
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/empresas/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    await loadCompanies();
+                    await loadSettingsPanelData();
+                } else {
+                    const err = await res.json();
+                    alert(err.detail);
+                }
             } catch (e) { console.error(e); }
         }
 

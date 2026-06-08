@@ -12,6 +12,10 @@ class EmpresaBase(BaseModel):
 class EmpresaCreate(EmpresaBase):
     pass
 
+class EmpresaUpdate(BaseModel):
+    nombre: Optional[str] = Field(None, max_length=100)
+    activo: Optional[bool] = None
+
 class EmpresaResponse(EmpresaBase):
     id: int
     fecha_creacion: datetime
@@ -222,6 +226,11 @@ class GrupoBase(BaseModel):
 class GrupoCreate(GrupoBase):
     pass
 
+class GrupoUpdate(BaseModel):
+    nombre: Optional[str] = Field(None, max_length=50)
+    permisos: Optional[str] = None
+    es_admin: Optional[bool] = None
+
 class GrupoResponse(GrupoBase):
     id: int
 
@@ -241,6 +250,14 @@ class UsuarioBase(BaseModel):
 
 class UsuarioCreate(UsuarioBase):
     password: str = Field(..., max_length=100)
+
+class UsuarioUpdate(BaseModel):
+    username: Optional[str] = Field(None, max_length=50)
+    full_name: Optional[str] = Field(None, max_length=100)
+    activo: Optional[bool] = None
+    grupo_id: Optional[int] = None
+    password: Optional[str] = Field(None, max_length=100)
+    canales_personales: Optional[str] = None
 
 class UsuarioResponse(UsuarioBase):
     id: int
