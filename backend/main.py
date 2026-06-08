@@ -177,6 +177,12 @@ async def update_agente(id: int, payload: schemas.AgenteBase, db: Session = Depe
     agente.conocimientos = payload.conocimientos
     agente.herramientas = payload.herramientas
     agente.modelo_config = payload.modelo_config
+    if payload.skills_activos is not None:
+        agente.skills_activos = payload.skills_activos
+    if payload.mcps_activos is not None:
+        agente.mcps_activos = payload.mcps_activos
+    if payload.permisos_api is not None:
+        agente.permisos_api = payload.permisos_api
     
     db.commit()
     db.refresh(agente)
@@ -187,15 +193,8 @@ async def update_agente(id: int, payload: schemas.AgenteBase, db: Session = Depe
             "id": agente.id,
             "empresa_id": agente.empresa_id,
             "nombre": agente.nombre,
-            "rol_prompt": agente.rol_prompt,
             "status": agente.status,
-            "tarea_actual": agente.tarea_actual,
-            "habilidades": agente.habilidades,
-            "objetivos": agente.objetivos,
-            "recursos": agente.recursos,
-            "conocimientos": agente.conocimientos,
-            "herramientas": agente.herramientas,
-            "modelo_config": agente.modelo_config
+            "tarea_actual": agente.tarea_actual
         }
     })
     return agente
@@ -885,6 +884,223 @@ def export_wiki_vault(empresa_id: int, db: Session = Depends(get_db)):
         "notes_count": len(notas),
         "vault": vault_export
     }
+
+
+# =====================================================================
+# FASE 4 — PERFIL RICO DE EMPRESA
+# =====================================================================
+
+@app.get("/api/empresas/{id}/perfil", response_model=schemas.EmpresaPerfilResponse)
+def get_empresa_perfil(id: int, db: Session = Depends(get_db)):
+    empresa = db.query(models.Empresa).filter(models.Empresa.id == id).first()
+    if not empresa:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada")
+    return empresa
+
+@app.put("/api/empresas/{id}/perfil", response_model=schemas.EmpresaPerfilResponse)
+def update_empresa_perfil(id: int, payload: schemas.EmpresaPerfilUpdate, db: Session = Depends(get_db)):
+    empresa = db.query(models.Empresa).filter(models.Empresa.id == id).first()
+    if not empresa:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada")
+    update_data = payload.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(empresa, key, value)
+    db.commit()
+    db.refresh(empresa)
+    return empresa
+
+
+# =====================================================================
+# FASE 4 — ACTIVIDADES DEL AGENTE
+# =====================================================================
+
+@app.get("/api/agentes/{agente_id}/actividades", response_model=List[schemas.ActividadAgenteResponse])
+def get_actividades(agente_id: int, db: Session = Depends(get_db)):
+    return db.query(models.ActividadAgente).filter(
+        models.ActividadAgente.agente_id == agente_id
+    ).order_by(models.ActividadAgente.timestamp.desc()).all()
+
+@app.post("/api/agentes/{agente_id}/actividades", response_model=schemas.ActividadAgenteResponse, status_code=201)
+def create_actividad(agente_id: int, payload: schemas.ActividadAgenteCreate, db: Session = Depends(get_db)):
+    agente = db.query(models.Agente).filter(models.Agente.id == agente_id).first()
+    if not agente:
+        raise HTTPException(status_code=404, detail="Agente no encontrado")
+    nueva = models.ActividadAgente(agente_id=agente_id, **payload.dict())
+    db.add(nueva)
+    db.commit()
+    db.refresh(nueva)
+    return nueva
+
+@app.delete("/api/agentes/{agente_id}/actividades/{actividad_id}")
+def delete_actividad(agente_id: int, actividad_id: int, db: Session = Depends(get_db)):
+    act = db.query(models.ActividadAgente).filter(
+        models.ActividadAgente.id == actividad_id,
+        models.ActividadAgente.agente_id == agente_id
+    ).first()
+    if not act:
+        raise HTTPException(status_code=404, detail="Actividad no encontrada")
+    db.delete(act)
+    db.commit()
+    return {"message": "Actividad eliminada"}
+
+
+# =====================================================================
+# FASE 4 — CRONS DEL AGENTE
+# =====================================================================
+
+@app.get("/api/agentes/{agente_id}/crons", response_model=List[schemas.CronProgramadoResponse])
+def get_crons(agente_id: int, db: Session = Depends(get_db)):
+    return db.query(models.CronProgramado).filter(
+        models.CronProgramado.agente_id == agente_id
+    ).all()
+
+@app.post("/api/agentes/{agente_id}/crons", response_model=schemas.CronProgramadoResponse, status_code=201)
+def create_cron(agente_id: int, payload: schemas.CronProgramadoCreate, db: Session = Depends(get_db)):
+    agente = db.query(models.Agente).filter(models.Agente.id == agente_id).first()
+    if not agente:
+        raise HTTPException(status_code=404, detail="Agente no encontrado")
+    nuevo = models.CronProgramado(agente_id=agente_id, **payload.dict())
+    db.add(nuevo)
+    db.commit()
+    db.refresh(nuevo)
+    return nuevo
+
+@app.put("/api/agentes/{agente_id}/crons/{cron_id}", response_model=schemas.CronProgramadoResponse)
+def update_cron(agente_id: int, cron_id: int, payload: schemas.CronProgramadoUpdate, db: Session = Depends(get_db)):
+    cron = db.query(models.CronProgramado).filter(
+        models.CronProgramado.id == cron_id,
+        models.CronProgramado.agente_id == agente_id
+    ).first()
+    if not cron:
+        raise HTTPException(status_code=404, detail="Cron no encontrado")
+    update_data = payload.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(cron, key, value)
+    db.commit()
+    db.refresh(cron)
+    return cron
+
+@app.delete("/api/agentes/{agente_id}/crons/{cron_id}")
+def delete_cron(agente_id: int, cron_id: int, db: Session = Depends(get_db)):
+    cron = db.query(models.CronProgramado).filter(
+        models.CronProgramado.id == cron_id,
+        models.CronProgramado.agente_id == agente_id
+    ).first()
+    if not cron:
+        raise HTTPException(status_code=404, detail="Cron no encontrado")
+    db.delete(cron)
+    db.commit()
+    return {"message": "Cron eliminado"}
+
+
+# =====================================================================
+# FASE 4 — CREDENCIALES DETALLE + PERMISOS + REVERTIR
+# =====================================================================
+
+@app.get("/api/credenciales/{id}/detalle")
+def get_credencial_detalle(id: int, admin: bool = False, db: Session = Depends(get_db)):
+    """Retorna detalle de una credencial. admin=true muestra valor real y snapshot."""
+    cred = db.query(models.CredencialApi).filter(models.CredencialApi.id == id).first()
+    if not cred:
+        raise HTTPException(status_code=404, detail="Credencial no encontrada")
+    return {
+        "id": cred.id,
+        "nombre": cred.nombre,
+        "proveedor": cred.proveedor,
+        "url_endpoint": cred.url_endpoint,
+        "config_json": cred.config_json,
+        "activo": cred.activo,
+        "permisos_herramientas": cred.permisos_herramientas,
+        "valor_visible": cred.credencial_valor if admin else "••••••••",
+        "valor_snapshot": cred.valor_snapshot if admin else None
+    }
+
+@app.put("/api/credenciales/{id}")
+def update_credencial(id: int, payload: schemas.CredencialApiUpdate, db: Session = Depends(get_db)):
+    cred = db.query(models.CredencialApi).filter(models.CredencialApi.id == id).first()
+    if not cred:
+        raise HTTPException(status_code=404, detail="Credencial no encontrada")
+    # Guardar snapshot antes de modificar
+    if payload.credencial_valor and payload.credencial_valor != cred.credencial_valor:
+        cred.valor_snapshot = cred.credencial_valor
+    update_data = payload.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(cred, key, value)
+    db.commit()
+    db.refresh(cred)
+    return {"message": "Credencial actualizada", "id": cred.id}
+
+@app.post("/api/credenciales/{id}/revertir")
+def revertir_credencial(id: int, db: Session = Depends(get_db)):
+    cred = db.query(models.CredencialApi).filter(models.CredencialApi.id == id).first()
+    if not cred:
+        raise HTTPException(status_code=404, detail="Credencial no encontrada")
+    if not cred.valor_snapshot:
+        raise HTTPException(status_code=400, detail="No hay snapshot disponible para revertir")
+    cred.credencial_valor = cred.valor_snapshot
+    cred.valor_snapshot = None
+    db.commit()
+    return {"message": "Credencial revertida al valor anterior"}
+
+
+# =====================================================================
+# FASE 4 — CATÁLOGO ESTÁTICO DE TOOLS
+# =====================================================================
+
+TOOLS_CATALOG = {
+    "google": [
+        {"id": "gmail.read", "nombre": "Gmail - Leer correos", "descripcion": "Permite leer y buscar correos del buzón del usuario.", "resultado_esperado": "Lista de correos, metadatos y contenido de mensajes."},
+        {"id": "gmail.send", "nombre": "Gmail - Enviar correos", "descripcion": "Permite enviar correos electrónicos desde la cuenta.", "resultado_esperado": "Confirmación de envío con ID del mensaje."},
+        {"id": "drive.read", "nombre": "Google Drive - Leer archivos", "descripcion": "Lista y descarga archivos de Drive.", "resultado_esperado": "Metadatos y contenido de archivos del drive."},
+        {"id": "drive.write", "nombre": "Google Drive - Escribir/Subir", "descripcion": "Crea, actualiza y sube archivos a Drive.", "resultado_esperado": "ID y URL del archivo creado o modificado."},
+        {"id": "docs", "nombre": "Google Docs", "descripcion": "Crea y edita documentos de texto.", "resultado_esperado": "URL del documento y confirmación de cambios."},
+        {"id": "sheets", "nombre": "Google Sheets", "descripcion": "Lee y escribe datos en hojas de cálculo.", "resultado_esperado": "Datos de celdas o confirmación de escritura."},
+        {"id": "slides", "nombre": "Google Slides", "descripcion": "Crea y modifica presentaciones.", "resultado_esperado": "URL de la presentación y confirmación de cambios."},
+        {"id": "calendar", "nombre": "Google Calendar", "descripcion": "Lee y crea eventos en el calendario.", "resultado_esperado": "Lista de eventos o confirmación de creación."},
+        {"id": "ai_studio.gemini-nano", "nombre": "Gemini Nano (AI Studio)", "descripcion": "Modelo ultra-ligero on-device para tareas rápidas.", "resultado_esperado": "Texto generado en latencia mínima."},
+        {"id": "ai_studio.gemini-1.5-flash", "nombre": "Gemini 1.5 Flash (AI Studio)", "descripcion": "Modelo rápido multimodal para texto e imágenes.", "resultado_esperado": "Respuesta de texto o análisis multimodal."},
+        {"id": "ai_studio.gemini-1.5-pro", "nombre": "Gemini 1.5 Pro (AI Studio)", "descripcion": "Máxima capacidad, ventana de 2M tokens.", "resultado_esperado": "Análisis profundo o respuestas complejas."},
+        {"id": "ai_studio.gemini-2.0-flash", "nombre": "Gemini 2.0 Flash (AI Studio)", "descripcion": "Siguiente generación de velocidad y capacidad.", "resultado_esperado": "Respuestas avanzadas con mayor comprensión."},
+        {"id": "ai_studio.imagen-3", "nombre": "Imagen 3 (AI Studio)", "descripcion": "Generación y edición de imágenes fotorrealistas.", "resultado_esperado": "URL o bytes de imagen generada."},
+        {"id": "ai_studio.veo-2", "nombre": "Veo 2 (AI Studio)", "descripcion": "Generación de video a partir de texto.", "resultado_esperado": "Video generado en formato estándar."},
+        {"id": "notebooklm", "nombre": "NotebookLM", "descripcion": "Síntesis y análisis de conocimiento desde documentos.", "resultado_esperado": "Respuestas fundamentadas en documentos cargados."}
+    ],
+    "openrouter": [
+        {"id": "model.hermes-3-llama", "nombre": "Hermes 3 Llama 3.1 405B", "descripcion": "Modelo open-source de alta capacidad.", "resultado_esperado": "Respuestas de texto complejas y razonamiento."},
+        {"id": "model.llama-3-8b-free", "nombre": "Llama 3 8B Instruct (Free)", "descripcion": "Modelo ligero y gratuito para tareas simples.", "resultado_esperado": "Respuestas de texto de calidad moderada."},
+        {"id": "model.mistral-7b-free", "nombre": "Mistral 7B Instruct (Free)", "descripcion": "Modelo eficiente de Mistral AI.", "resultado_esperado": "Respuestas rápidas y coherentes."}
+    ],
+    "hermes": [
+        {"id": "browser", "nombre": "Browser-Use (Navegación Web)", "descripcion": "Controla un navegador real para buscar e interactuar con webs.", "resultado_esperado": "Datos extraídos de páginas web o acciones completadas."},
+        {"id": "terminal", "nombre": "Terminal/Bash", "descripcion": "Ejecuta comandos de sistema en el VPS.", "resultado_esperado": "Output del comando ejecutado."},
+        {"id": "file", "nombre": "Gestión de Archivos", "descripcion": "Lee, escribe y organiza archivos del sistema.", "resultado_esperado": "Contenido de archivos o confirmación de operaciones."},
+        {"id": "memory", "nombre": "Memoria Persistente", "descripcion": "Guarda y recupera información entre sesiones.", "resultado_esperado": "Datos recuperados del almacenamiento persistente."},
+        {"id": "search", "nombre": "Búsqueda Web", "descripcion": "Realiza búsquedas en internet y extrae resultados.", "resultado_esperado": "Lista de resultados con URLs y resúmenes."},
+        {"id": "cronjob", "nombre": "Cron Jobs", "descripcion": "Programa y gestiona tareas automatizadas periódicas.", "resultado_esperado": "Confirmación de programación o ejecución de la tarea."},
+        {"id": "send_message", "nombre": "Enviar Mensajes (Telegram/Email)", "descripcion": "Envía mensajes a través de Telegram u otros canales.", "resultado_esperado": "Confirmación de mensaje entregado."},
+        {"id": "todo", "nombre": "Lista de Tareas (TODO)", "descripcion": "Gestiona listas de tareas y pendientes.", "resultado_esperado": "Lista actualizada de tareas."},
+        {"id": "odoo_xmlrpc", "nombre": "Odoo XML-RPC", "descripcion": "Interactúa con Odoo vía API XML-RPC para gestión empresarial.", "resultado_esperado": "Datos de Odoo o confirmación de operaciones CRUD."},
+        {"id": "pg_dump", "nombre": "Backup PostgreSQL", "descripcion": "Realiza copias de seguridad de la base de datos.", "resultado_esperado": "Archivo de backup generado."},
+        {"id": "docker_cli", "nombre": "Docker CLI", "descripcion": "Controla contenedores Docker en el VPS.", "resultado_esperado": "Estado de contenedores o resultado de operaciones."}
+    ],
+    "mcp": [
+        {"id": "mcp-filesystem", "nombre": "MCP Filesystem", "descripcion": "Acceso estructurado al sistema de archivos vía protocolo MCP.", "resultado_esperado": "Listados de archivos y contenido de documentos."},
+        {"id": "mcp-brave-search", "nombre": "MCP Brave Search", "descripcion": "Búsquedas privadas en internet usando Brave Search.", "resultado_esperado": "Resultados de búsqueda sin seguimiento."},
+        {"id": "mcp-github", "nombre": "MCP GitHub", "descripcion": "Interacción con repositorios de GitHub vía MCP.", "resultado_esperado": "Datos de repositorios, PRs, issues y commits."},
+        {"id": "mcp-postgres", "nombre": "MCP PostgreSQL", "descripcion": "Consultas directas a bases de datos PostgreSQL.", "resultado_esperado": "Resultados de consultas SQL."},
+        {"id": "mcp-slack", "nombre": "MCP Slack", "descripcion": "Integración con canales y mensajes de Slack.", "resultado_esperado": "Mensajes enviados o lista de canales."},
+        {"id": "mcp-puppeteer", "nombre": "MCP Puppeteer", "descripcion": "Automatización de navegador web headless.", "resultado_esperado": "Screenshots, datos extraídos o acciones ejecutadas."}
+    ]
+}
+
+@app.get("/api/tools/catalogo")
+def get_tools_catalog(proveedor: Optional[str] = None):
+    """Retorna el catálogo completo de tools disponibles, filtrable por proveedor."""
+    if proveedor:
+        if proveedor not in TOOLS_CATALOG:
+            raise HTTPException(status_code=404, detail=f"Proveedor '{proveedor}' no encontrado en catálogo")
+        return {proveedor: TOOLS_CATALOG[proveedor]}
+    return TOOLS_CATALOG
 
 
 # Servir archivos estáticos del frontend

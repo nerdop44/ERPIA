@@ -541,7 +541,312 @@
             padding: 4px 10px;
         }
 
-        /* Tablero Module Columns Layout */
+        /* ── Agent Workspace Split (resizable) ── */
+        .agent-workspace-layout {
+            display: grid;
+            grid-template-columns: 1fr 6px 420px;
+            height: 100%;
+            background-color: var(--bg-light);
+        }
+        .ws-resize-handle {
+            background-color: var(--border-color);
+            cursor: col-resize;
+            transition: background-color 0.2s;
+        }
+        .ws-resize-handle:hover {
+            background-color: var(--odoo-primary);
+        }
+
+        /* ── Workspace internal tab bar ── */
+        .ws-tab-bar {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--bg-light);
+            overflow-x: auto;
+            flex-shrink: 0;
+        }
+        .ws-tab-btn {
+            flex-shrink: 0;
+            padding: 9px 14px;
+            border: none;
+            background: transparent;
+            font-family: var(--font-body);
+            font-size: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s, border-color 0.2s;
+            white-space: nowrap;
+        }
+        .ws-tab-btn:hover { color: var(--odoo-primary); }
+        .ws-tab-btn.active {
+            color: var(--odoo-primary);
+            border-bottom-color: var(--odoo-primary);
+            font-weight: 600;
+        }
+        .ws-tab-content {
+            overflow-y: auto;
+            padding: 10px;
+            flex: 1;
+        }
+        .agent-profile-section {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-light);
+        }
+
+        /* ── Skills & MCPs ── */
+        .skill-badges-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-height: 30px;
+        }
+        .skill-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+        .skill-badge:hover { border-color: var(--odoo-primary); background-color: #F5F0F3; }
+        .skill-badge .remove-skill {
+            color: var(--text-muted);
+            font-size: 13px;
+            cursor: pointer;
+            margin-left: 2px;
+        }
+        .skill-badge .remove-skill:hover { color: #EF4444; }
+        .skills-empty-state {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 8px 0;
+        }
+        .skills-table-container { width: 100%; }
+        .skills-table-container table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .skills-table-container th {
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .skills-table-container td {
+            padding: 8px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+        .skills-table-container tr:last-child td { border-bottom: none; }
+        .skills-table-container td input {
+            width: 100%;
+            border: 1px solid transparent;
+            background: transparent;
+            font-family: var(--font-body);
+            font-size: 12px;
+            color: var(--text-dark);
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        .skills-table-container td input:focus {
+            border-color: var(--odoo-primary);
+            outline: none;
+            background: var(--bg-white);
+        }
+
+        /* ── Historial timeline ── */
+        .actividad-item {
+            display: flex;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 12px;
+        }
+        .actividad-item:last-child { border-bottom: none; }
+        .actividad-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+        .actividad-dot.tarea { background-color: var(--odoo-secondary); }
+        .actividad-dot.cron { background-color: #F59E0B; }
+        .actividad-dot.error { background-color: #EF4444; }
+        .actividad-dot.sistema { background-color: #6B7280; }
+        .actividad-time {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+        .cron-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 12px;
+            gap: 8px;
+        }
+        .cron-item:last-child { border-bottom: none; }
+        .cron-expr {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            background: var(--bg-light);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* ── Metric chips ── */
+        .metric-chip {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 8px;
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            text-align: center;
+            transition: border-color 0.2s;
+            cursor: default;
+        }
+        .metric-chip:hover { border-color: var(--odoo-primary); }
+        .metric-val {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--odoo-primary);
+            line-height: 1;
+        }
+        .metric-lbl {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 3px;
+        }
+
+        /* ── Skill detail tooltip/popover ── */
+        .skill-popover {
+            position: fixed;
+            z-index: 9999;
+            background: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            padding: 16px;
+            max-width: 300px;
+            font-size: 12px;
+            animation: fadeInUp 0.15s ease;
+        }
+        .skill-popover h5 {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--odoo-primary);
+            margin-bottom: 8px;
+        }
+        .skill-popover p { color: var(--text-muted); line-height: 1.5; margin-bottom: 6px; }
+        .skill-popover .result-tag {
+            display: inline-block;
+            background: #ECFDF5;
+            color: #059669;
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .skill-popover .close-popover {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        /* ── Credential detail modal ── */
+        .cred-detail-row {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 10px;
+            align-items: start;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+        .cred-detail-row:last-child { border-bottom: none; }
+        .cred-detail-label {
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .cred-value-masked {
+            font-family: var(--font-mono);
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+        }
+        .cred-value-real {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            word-break: break-all;
+            color: var(--text-dark);
+        }
+        .tools-permission-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .tool-perm-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            padding: 5px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-light);
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .tool-perm-item:hover { border-color: var(--odoo-primary); }
+        .tool-perm-item input[type="checkbox"] { cursor: pointer; accent-color: var(--odoo-primary); }
+
+        /* ── Empresa Perfil sección ── */
+        .perfil-section-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--text-muted);
+            margin: 18px 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .perfil-section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+        }
+
         .tablero-layout {
             display: grid;
             grid-template-columns: var(--left-width, 260px) 6px 1fr 6px var(--right-width, 360px);
@@ -1382,14 +1687,6 @@
                     <i class="fa-solid fa-brain"></i>
                     <span>ERPIA</span>
                 </div>
-                <nav class="navbar-menu">
-                    <a class="navbar-item active" id="nav-tablero" onclick="switchModule('tablero')">
-                        <i class="fa-solid fa-table-columns" style="margin-right:6px;"></i>Tablero
-                    </a>
-                    <a class="navbar-item" id="nav-wiki" onclick="switchModule('wiki')">
-                        <i class="fa-solid fa-book-open" style="margin-right:6px;"></i>Obsidian Wiki
-                    </a>
-                </nav>
             </div>
             
             <div class="navbar-right">
@@ -1500,19 +1797,42 @@
         <!-- 1. Tablero Dashboard Module Viewport -->
         <div id="module-tablero" class="module-viewport active">
             <div class="tablero-layout">
-                <!-- Left Column: Configs & Settings -->
+                <!-- Left Column: Resumen Empresa -->
                 <section class="column column-border-right" id="left-sidebar">
                     <div class="column-header">
-                        <span>Configuraciones de Entorno</span>
-                        <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="openModal('modal-config')">
-                            <i class="fa-solid fa-plus"></i>
+                        <span>Resumen de Empresa</span>
+                        <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="switchModule('ajustes'); switchAjustesSection('empresa-perfil')" title="Editar perfil de empresa">
+                            <i class="fa-solid fa-pen"></i>
                         </button>
                     </div>
                     <div class="column-content">
-                        <div id="configs-container">
-                            <!-- Filled dynamically -->
+                        <!-- Tarjeta de identidad de empresa -->
+                        <div id="empresa-resumen-card" style="padding: 15px;">
+                            <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
+                                <div style="width:44px; height:44px; border-radius:10px; background: linear-gradient(135deg, var(--odoo-primary), var(--odoo-secondary)); display:flex; align-items:center; justify-content:center; color:white; font-size:18px; flex-shrink:0;">
+                                    <i class="fa-solid fa-building"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight:700; font-size:14px;" id="sidebar-empresa-nombre">Cargando...</div>
+                                    <div style="font-size:11px; color:var(--text-muted);" id="sidebar-empresa-vertical">—</div>
+                                </div>
+                            </div>
+                            <div id="sidebar-empresa-mision" style="font-size:12px; color:var(--text-muted); line-height:1.5; border-left:3px solid var(--odoo-primary); padding-left:10px; font-style:italic; margin-bottom:15px;">Sin misión configurada.</div>
+                            
+                            <!-- Métricas rápidas -->
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:15px;">
+                                <div class="metric-chip" id="metric-agentes"><span class="metric-val">0</span><span class="metric-lbl">Agentes</span></div>
+                                <div class="metric-chip" id="metric-tareas"><span class="metric-val">0</span><span class="metric-lbl">Tareas</span></div>
+                                <div class="metric-chip" id="metric-credenciales"><span class="metric-val">0</span><span class="metric-lbl">Credenciales</span></div>
+                                <div class="metric-chip" id="metric-notas"><span class="metric-val">0</span><span class="metric-lbl">Notas Wiki</span></div>
+                            </div>
+
+                            <!-- Canales de comunicación -->
+                            <div style="font-size:11px; font-weight:600; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.05em; margin-bottom:8px;">Canales de Comunicación</div>
+                            <div id="sidebar-canales" style="font-size:12px; color:var(--text-muted);">No configurados. <a href="#" onclick="switchModule('ajustes'); switchAjustesSection('empresa-perfil')" style="color:var(--odoo-primary);">Configurar</a></div>
                         </div>
-                        <div style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+
+                        <div style="margin: 0 15px 15px; border-top: 1px solid var(--border-color); padding-top: 15px;">
                             <button class="btn btn-secondary" style="width:100%;" onclick="openModal('modal-agent')">
                                 <i class="fa-solid fa-robot"></i> Registrar Agente
                             </button>
@@ -1641,6 +1961,7 @@
         <div id="module-ajustes" class="module-viewport">
             <div class="settings-layout">
                 <div class="settings-sidebar">
+                    <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); padding: 15px 18px 8px;">General</div>
                     <div class="settings-menu-item active" id="menu-users" onclick="switchSettingsPanel('users')">
                         <i class="fa-solid fa-user-group" style="margin-right:10px;"></i>Usuarios
                     </div>
@@ -1649,6 +1970,10 @@
                     </div>
                     <div class="settings-menu-item" id="menu-companies" onclick="switchSettingsPanel('companies')">
                         <i class="fa-solid fa-building" style="margin-right:10px;"></i>Empresas
+                    </div>
+                    <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); padding: 15px 18px 8px;">Empresa Activa</div>
+                    <div class="settings-menu-item" id="menu-empresa-perfil" onclick="switchSettingsPanel('empresa-perfil')">
+                        <i class="fa-solid fa-id-card" style="margin-right:10px;"></i>Perfil de Empresa
                     </div>
                     <div class="settings-menu-item" id="menu-credentials" onclick="switchSettingsPanel('credentials')">
                         <i class="fa-solid fa-key" style="margin-right:10px;"></i>Credenciales API
@@ -1732,7 +2057,7 @@
         </div>
     </div>
 
-    <!-- Modal Agregar Configuración -->
+    <!-- Modal Agregar Configuración (mantenido por compatibilidad interna) -->
     <div id="modal-config" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1760,7 +2085,101 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('modal-config')">Descartar</button>
-                <button class="btn" onclick="submitConfig()">Agregar</button>
+                <button class="btn" onclick="submitConfig()">Guardar Configuración</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Agregar Actividad de Agente -->
+    <div id="modal-actividad" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Registrar Actividad</span>
+                <button class="close-modal" onclick="closeModal('modal-actividad')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="actividad-agente-id">
+                <div class="form-group">
+                    <label for="actividad-tipo">Tipo</label>
+                    <select id="actividad-tipo">
+                        <option value="tarea">🔵 Tarea</option>
+                        <option value="cron">🟡 Cron</option>
+                        <option value="error">🔴 Error</option>
+                        <option value="sistema">⚪ Sistema</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="actividad-titulo">Título</label>
+                    <input type="text" id="actividad-titulo" placeholder="Describe brevemente la actividad">
+                </div>
+                <div class="form-group">
+                    <label for="actividad-descripcion">Descripción (opcional)</label>
+                    <textarea id="actividad-descripcion" rows="3" placeholder="Detalles adicionales..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="actividad-estado">Estado</label>
+                    <select id="actividad-estado">
+                        <option value="completado">Completado</option>
+                        <option value="error">Con Error</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-actividad')">Cancelar</button>
+                <button class="btn" onclick="submitActividad()">Registrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Agregar Cron -->
+    <div id="modal-cron" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Programar Cron</span>
+                <button class="close-modal" onclick="closeModal('modal-cron')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="cron-agente-id">
+                <input type="hidden" id="cron-edit-id">
+                <div class="form-group">
+                    <label for="cron-nombre">Nombre del Cron</label>
+                    <input type="text" id="cron-nombre" placeholder="Ej: Reporte semanal de ventas">
+                </div>
+                <div class="form-group">
+                    <label for="cron-descripcion">Descripción (opcional)</label>
+                    <textarea id="cron-descripcion" rows="2" placeholder="¿Qué hace este cron?"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="cron-expresion">Expresión Cron</label>
+                    <input type="text" id="cron-expresion" placeholder="Ej: 0 18 * * 5 (cada viernes a las 6pm)">
+                    <small style="color:var(--text-muted); font-size:11px;">Formato: minuto hora día mes día_semana</small>
+                </div>
+                <div class="form-group">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="cron-activo" checked> Activo al crear
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-cron')">Cancelar</button>
+                <button class="btn" onclick="submitCron()">Guardar Cron</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalle de Credencial -->
+    <div id="modal-cred-detalle" class="modal">
+        <div class="modal-content" style="max-width:600px;">
+            <div class="modal-header">
+                <span class="modal-title" id="modal-cred-titulo">Detalle de Credencial</span>
+                <button class="close-modal" onclick="closeModal('modal-cred-detalle')">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-cred-body">
+                <!-- Filled dynamically -->
+            </div>
+            <div class="modal-footer" id="modal-cred-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-cred-detalle')">Cerrar</button>
             </div>
         </div>
     </div>
@@ -2787,67 +3206,177 @@
                 moduleContainer.id = `module-agent-${agentId}`;
                 moduleContainer.className = 'module-viewport';
                 moduleContainer.innerHTML = `
-                    <div class="agent-workspace-layout">
-                        <!-- Chat Section -->
-                        <div class="agent-chat-section">
-                            <div class="column-header" style="border-bottom: 1px solid var(--border-color); background-color: var(--bg-white);">
-                                <span>Conversación con ${agentName}</span>
-                                <span class="agent-status-indicator" id="agent-status-${agentId}">Estado: Desconectado</span>
+                    <div class="agent-workspace-layout" id="ws-layout-${agentId}">
+                        <!-- Chat Section (left, resizable) -->
+                        <div class="agent-chat-section" id="ws-chat-${agentId}">
+                            <div class="column-header" style="border-bottom: 1px solid var(--border-color); background-color: var(--bg-white); padding: 10px 15px; display:flex; align-items:center; justify-content:space-between;">
+                                <span style="font-size:13px; font-weight:600;">Conversación con ${agentName}</span>
+                                <span class="agent-status-indicator" id="agent-status-${agentId}">● EN ESPERA</span>
                             </div>
                             <div class="agent-chat-messages" id="agent-chat-messages-${agentId}">
                                 <!-- Chat history populated here -->
                             </div>
                             <div class="agent-chat-input-area">
                                 <textarea id="agent-chat-input-${agentId}" placeholder="Escribe un mensaje para ${agentName}..." onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); sendAgentChatMessage(${agentId}); }"></textarea>
-                                <button class="btn" onclick="sendAgentChatMessage(${agentId})">
+                                <button class="btn" style="background:var(--odoo-primary); color:white;" onclick="sendAgentChatMessage(${agentId})">
                                     <i class="fa-solid fa-paper-plane"></i> Enviar
                                 </button>
                             </div>
                         </div>
-                        
-                        <!-- Settings / Profile Section -->
-                        <div class="agent-profile-section">
-                            <div class="agent-profile-card">
-                                <h4 style="margin-bottom:12px; color:var(--odoo-primary); font-size:14px;"><i class="fa-solid fa-gears"></i> Parámetros del Agente</h4>
-                                <div class="form-group">
-                                    <label>Nombre del Agente</label>
-                                    <input type="text" id="agent-profile-name-${agentId}" style="font-size:12px;">
-                                </div>
-                                <div class="form-group">
-                                    <label>Prompt del Sistema / Rol</label>
-                                    <textarea id="agent-profile-rol-${agentId}" rows="6" style="font-size:12px; resize:vertical;"></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label>Habilidades</label>
-                                    <input type="text" id="agent-profile-skills-${agentId}" placeholder="Ej: Búsqueda web, análisis de datos" style="font-size:12px;">
-                                </div>
-                                <div class="form-group">
-                                    <label>Objetivos</label>
-                                    <input type="text" id="agent-profile-objectives-${agentId}" placeholder="Ej: Responder dudas, automatizar tareas" style="font-size:12px;">
+
+                        <!-- Resize Handle -->
+                        <div class="ws-resize-handle" id="ws-handle-${agentId}" onmousedown="initWsResize(event, ${agentId})"></div>
+
+                        <!-- Config Section (right, tabbed) -->
+                        <div class="agent-profile-section" id="ws-config-${agentId}">
+                            <!-- Tab bar -->
+                            <div class="ws-tab-bar">
+                                <button class="ws-tab-btn active" id="wstab-params-${agentId}" onclick="switchWsTab(${agentId}, 'params')">
+                                    <i class="fa-solid fa-gears"></i> Parámetros
+                                </button>
+                                <button class="ws-tab-btn" id="wstab-skills-${agentId}" onclick="switchWsTab(${agentId}, 'skills')">
+                                    <i class="fa-solid fa-puzzle-piece"></i> Habilidades
+                                </button>
+                                <button class="ws-tab-btn" id="wstab-history-${agentId}" onclick="switchWsTab(${agentId}, 'history')">
+                                    <i class="fa-solid fa-clock-rotate-left"></i> Historial
+                                </button>
+                                <button class="ws-tab-btn" id="wstab-llm-${agentId}" onclick="switchWsTab(${agentId}, 'llm')">
+                                    <i class="fa-solid fa-microchip"></i> LLM
+                                </button>
+                            </div>
+
+                            <!-- TAB 1: Parámetros -->
+                            <div class="ws-tab-content" id="wscontent-params-${agentId}">
+                                <div class="agent-profile-card">
+                                    <div class="form-group">
+                                        <label>Nombre del Agente</label>
+                                        <input type="text" id="agent-profile-name-${agentId}" style="font-size:12px;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Prompt del Sistema / Rol</label>
+                                        <textarea id="agent-profile-rol-${agentId}" rows="7" style="font-size:12px; resize:vertical; line-height:1.5;"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Objetivos del Agente</label>
+                                        <textarea id="agent-profile-objectives-${agentId}" rows="4" style="font-size:12px; resize:vertical;" placeholder="Describe los objetivos y metas de este agente..."></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Recursos Disponibles</label>
+                                        <input type="text" id="agent-profile-recursos-${agentId}" placeholder="Ej: VPS 8GB, Odoo API, Google OAuth2" style="font-size:12px;">
+                                    </div>
+                                    <button class="btn btn-success" style="width:100%;" onclick="saveActiveAgentConfig(${agentId})">
+                                        <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios
+                                    </button>
                                 </div>
                             </div>
-                            
-                            <div class="agent-profile-card">
-                                <h4 style="margin-bottom:12px; color:var(--odoo-primary); font-size:14px;"><i class="fa-solid fa-microchip"></i> Configuración de LLM</h4>
-                                <div class="form-group">
-                                    <label>Proveedor de LLM</label>
-                                    <select id="agent-profile-provider-${agentId}" onchange="updateModelSelectOptions(${agentId})" style="font-size:12px;">
-                                        <option value="google">Google Gemini</option>
-                                        <option value="openrouter">OpenRouter</option>
-                                        <option value="hermes">Hermes (Local VPS)</option>
-                                    </select>
+
+                            <!-- TAB 2: Habilidades & Skills -->
+                            <div class="ws-tab-content" id="wscontent-skills-${agentId}" style="display:none;">
+                                <!-- A: Habilidades Nativas -->
+                                <div class="agent-profile-card">
+                                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                                        <h4 style="color:var(--odoo-primary); font-size:13px;"><i class="fa-solid fa-star"></i> Habilidades Nativas</h4>
+                                        <button class="btn" style="font-size:11px; padding:3px 8px;" onclick="addNativeSkill(${agentId})">
+                                            <i class="fa-solid fa-plus"></i> Añadir
+                                        </button>
+                                    </div>
+                                    <div id="native-skills-table-${agentId}" class="skills-table-container">
+                                        <div class="skills-empty-state"><i class="fa-solid fa-info-circle"></i> Cargando habilidades...</div>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label>Modelo Específico</label>
-                                    <select id="agent-profile-model-${agentId}" style="font-size:12px;">
-                                        <!-- Populated dynamically based on provider -->
-                                    </select>
+
+                                <!-- B: Skills Disponibles -->
+                                <div class="agent-profile-card">
+                                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                                        <h4 style="color:var(--odoo-primary); font-size:13px;"><i class="fa-solid fa-plug"></i> Skills del Sistema</h4>
+                                        <select class="skill-add-select" onchange="addSkillToAgent(${agentId}, 'skills', this.value, this)" style="font-size:11px; padding:3px 6px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-white); color:var(--text-dark);">
+                                            <option value="">+ Agregar skill...</option>
+                                        </select>
+                                    </div>
+                                    <div id="active-skills-${agentId}" class="skill-badges-container"></div>
                                 </div>
-                                <div class="form-group">
-                                    <label>Asociar Nota de Obsidian (Conocimiento)</label>
-                                    <select id="agent-profile-knowledge-${agentId}" style="font-size:12px;">
-                                        <!-- Filled with company notes -->
-                                    </select>
+
+                                <!-- C: MCPs -->
+                                <div class="agent-profile-card">
+                                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                                        <h4 style="color:var(--odoo-primary); font-size:13px;"><i class="fa-solid fa-server"></i> MCPs</h4>
+                                        <select class="skill-add-select" onchange="addSkillToAgent(${agentId}, 'mcps', this.value, this)" style="font-size:11px; padding:3px 6px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-white); color:var(--text-dark);">
+                                            <option value="">+ Agregar MCP...</option>
+                                        </select>
+                                    </div>
+                                    <div id="active-mcps-${agentId}" class="skill-badges-container"></div>
+                                </div>
+
+                                <!-- D: APIs / Credenciales -->
+                                <div class="agent-profile-card">
+                                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                                        <h4 style="color:var(--odoo-primary); font-size:13px;"><i class="fa-solid fa-key"></i> APIs y Credenciales</h4>
+                                    </div>
+                                    <div id="active-apis-${agentId}" class="skill-badges-container"></div>
+                                </div>
+
+                                <div style="padding: 0 15px 15px;">
+                                    <button class="btn btn-success" style="width:100%;" onclick="saveAgentSkills(${agentId})">
+                                        <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios de Habilidades
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- TAB 3: Historial & Crons -->
+                            <div class="ws-tab-content" id="wscontent-history-${agentId}" style="display:none;">
+                                <!-- Historial de Actividades -->
+                                <div class="agent-profile-card">
+                                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                                        <h4 style="color:var(--odoo-primary); font-size:13px;"><i class="fa-solid fa-timeline"></i> Historial de Actividades</h4>
+                                        <button class="btn" style="font-size:11px; padding:3px 8px;" onclick="openAddActividadModal(${agentId})">
+                                            <i class="fa-solid fa-plus"></i>
+                                        </button>
+                                    </div>
+                                    <div id="actividades-list-${agentId}" style="max-height:220px; overflow-y:auto;">
+                                        <div class="skills-empty-state">Sin actividades registradas.</div>
+                                    </div>
+                                </div>
+
+                                <!-- Crons Programados -->
+                                <div class="agent-profile-card">
+                                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                                        <h4 style="color:var(--odoo-primary); font-size:13px;"><i class="fa-solid fa-clock"></i> Crons Programados</h4>
+                                        <button class="btn" style="font-size:11px; padding:3px 8px;" onclick="openAddCronModal(${agentId})">
+                                            <i class="fa-solid fa-plus"></i>
+                                        </button>
+                                    </div>
+                                    <div id="crons-list-${agentId}" style="max-height:220px; overflow-y:auto;">
+                                        <div class="skills-empty-state">Sin crons programados.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- TAB 4: LLM Config -->
+                            <div class="ws-tab-content" id="wscontent-llm-${agentId}" style="display:none;">
+                                <div class="agent-profile-card">
+                                    <div class="form-group">
+                                        <label>Proveedor de LLM</label>
+                                        <select id="agent-profile-provider-${agentId}" onchange="updateModelSelectOptions(${agentId})" style="font-size:12px;">
+                                            <option value="google">Google Gemini (AI Studio)</option>
+                                            <option value="openrouter">OpenRouter</option>
+                                            <option value="hermes">Hermes (Local VPS)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Modelo Específico</label>
+                                        <select id="agent-profile-model-${agentId}" style="font-size:12px;">
+                                            <!-- Populated dynamically based on provider -->
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Asociar Nota de Obsidian (Conocimiento)</label>
+                                        <select id="agent-profile-knowledge-${agentId}" style="font-size:12px;">
+                                            <!-- Filled with company notes -->
+                                        </select>
+                                    </div>
+                                    <button class="btn btn-success" style="width:100%;" onclick="saveActiveAgentConfig(${agentId})">
+                                        <i class="fa-solid fa-floppy-disk"></i> Guardar Configuración LLM
+                                    </button>
                                 </div>
                             </div>
                         </div>
