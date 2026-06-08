@@ -370,9 +370,14 @@ def login(payload: schemas.LoginRequest, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(user)
 
+    user_is_admin = False
+    if user.grupo:
+        user_is_admin = user.grupo.es_admin or False
+
     return {
         "token": f"token-{user.username}",
-        "usuario": user
+        "usuario": user,
+        "is_admin": user_is_admin
     }
 
 @app.get("/api/auth/me", response_model=schemas.UsuarioResponse)

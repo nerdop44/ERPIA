@@ -249,18 +249,21 @@ def create_mock_data():
 
         # Siembra de Grupos
         grupos_def = [
-            ("Administradores", '["all"]'),
-            ("Operadores", '["read", "write"]')
+            ("Administradores", '["all"]', True),
+            ("Operadores", '["read", "write"]', False)
         ]
         grupos_map = {}
-        for nombre, perms in grupos_def:
+        for nombre, perms, admin in grupos_def:
             ex_grupo = db.query(models.Grupo).filter(models.Grupo.nombre == nombre).first()
             if not ex_grupo:
-                ex_grupo = models.Grupo(nombre=nombre, permisos=perms)
+                ex_grupo = models.Grupo(nombre=nombre, permisos=perms, es_admin=admin)
                 db.add(ex_grupo)
                 db.commit()
                 db.refresh(ex_grupo)
-                print(f"[+] Grupo creado: {nombre}")
+                print(f"[+] Grupo creado: {nombre} (admin={admin})")
+            else:
+                ex_grupo.es_admin = admin
+                db.commit()
             grupos_map[nombre] = ex_grupo.id
 
         # Siembra de Usuarios

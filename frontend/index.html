@@ -2406,6 +2406,7 @@
                     localStorage.setItem('erpia-token', data.token);
                     localStorage.setItem('erpia-username', data.usuario.username);
                     localStorage.setItem('erpia-fullname', data.usuario.full_name || data.usuario.username);
+                    localStorage.setItem('erpia-is-admin', data.is_admin ? 'true' : 'false');
                     userToken = data.token;
                     
                     document.getElementById('login-screen').style.display = 'none';
@@ -2562,6 +2563,7 @@
                 await loadConfigs();
                 await loadAgentsAndTasks();
                 await loadLogs();
+                await loadEmpresaResumen();
                 
                 // If on wiki, load notes
                 if (activeModule === 'wiki') {
@@ -2577,6 +2579,40 @@
         async function selectCompany(id, nombre) {
             selectedCompanyId = id;
             await loadCompanies();
+        }
+
+        async function loadEmpresaResumen() {
+            if (!selectedCompanyId) return;
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/empresas/${selectedCompanyId}/perfil`);
+                if (!res.ok) return;
+                const emp = await res.json();
+
+                document.getElementById('sidebar-empresa-nombre').innerText = emp.nombre || 'Sin nombre';
+                document.getElementById('sidebar-empresa-vertical').innerText = emp.vertical_negocio || '—';
+                document.getElementById('sidebar-empresa-mision').innerText = emp.mision || 'Sin misión configurada.';
+
+                const canalesEl = document.getElementById('sidebar-canales');
+                if (emp.canales_comunicacion && emp.canales_comunicacion !== '{}') {
+                    try {
+                        const canales = JSON.parse(emp.canales_comunicacion);
+                        const entries = Object.entries(canales);
+                        if (entries.length > 0) {
+                            canalesEl.innerHTML = entries.map(([k, v]) => {
+                                const tipo = k.charAt(0).toUpperCase() + k.slice(1);
+                                const detalle = typeof v === 'object' ? Object.keys(v).join(', ') : v;
+                                return `<div style="margin-bottom:4px;"><i class="fa-solid fa-${k === 'telegram' ? 'telegram' : 'envelope'}" style="width:16px;"></i> <strong>${tipo}:</strong> ${detalle}</div>`;
+                            }).join('');
+                        } else {
+                            canalesEl.innerHTML = 'No configurados. <a href="#" onclick="switchModule(\'ajustes\'); switchAjustesSection(\'empresa-perfil\')" style="color:var(--odoo-primary);">Configurar</a>';
+                        }
+                    } catch(e) {
+                        canalesEl.innerHTML = emp.canales_comunicacion;
+                    }
+                } else {
+                    canalesEl.innerHTML = 'No configurados. <a href="#" onclick="switchModule(\'ajustes\'); switchAjustesSection(\'empresa-perfil\')" style="color:var(--odoo-primary);">Configurar</a>';
+                }
+            } catch (e) { console.error(e); }
         }
 
         async function loadConfigs() {
@@ -3182,7 +3218,110 @@
                         </table>
                     `;
                 } catch (e) { console.error(e); }
+            } else if (activeSettingsPanel === 'empresa-perfil') {
+                if (!selectedCompanyId) {
+                    container.innerHTML = `<h4>Por favor, seleccione una empresa activa antes de editar su perfil.</h4>`;
+                    return;
+                }
+                try {
+                    const res = await fetch(`${apiBaseUrl}/api/empresas/${selectedCompanyId}/perfil`);
+                    const emp = await res.json();
+                    container.innerHTML = `
+                        <div class="settings-section-title">Perfil de Empresa</div>
+                        <div style="padding:15px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                            <div class="form-group">
+                                <label>Nombre</label>
+                                <input type="text" id="perfil-nombre" value="${emp.nombre || ''}" style="font-size:12px;">
+                            </div>
+                            <div class="form-group">
+                                <label>RIF</label>
+                                <input type="text" id="perfil-rif" value="${emp.rif || ''}" style="font-size:12px;">
+                            </div>
+                            <div class="form-group">
+                                <label>Teléfono</label>
+                                <input type="text" id="perfil-telefono" value="${emp.telefono || ''}" style="font-size:12px;">
+                            </div>
+                            <div class="form-group">
+                                <label>País</label>
+                                <input type="text" id="perfil-pais" value="${emp.pais || ''}" style="font-size:12px;">
+                            </div>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label>Dirección</label>
+                                <input type="text" id="perfil-direccion" value="${emp.direccion || ''}" style="font-size:12px;">
+                            </div>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label>Sitio Web</label>
+                                <input type="text" id="perfil-sitio-web" value="${emp.sitio_web || ''}" style="font-size:12px;">
+                            </div>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label>Vertical de Negocio</label>
+                                <input type="text" id="perfil-vertical" value="${emp.vertical_negocio || ''}" placeholder="Ej: Restaurante, Tecnología, Retail" style="font-size:12px;">
+                            </div>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label>Descripción de la Actividad</label>
+                                <textarea id="perfil-descripcion" rows="3" style="font-size:12px;">${emp.descripcion_actividad || ''}</textarea>
+                            </div>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label>Misión</label>
+                                <textarea id="perfil-mision" rows="3" style="font-size:12px; font-style:italic;">${emp.mision || ''}</textarea>
+                            </div>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label>Visión</label>
+                                <textarea id="perfil-vision" rows="3" style="font-size:12px; font-style:italic;">${emp.vision || ''}</textarea>
+                            </div>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label>Objetivos Generales</label>
+                                <textarea id="perfil-objetivos" rows="3" style="font-size:12px;">${emp.objetivos_generales || ''}</textarea>
+                            </div>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label>Canales de Comunicación (JSON)</label>
+                                <textarea id="perfil-canales" rows="3" style="font-size:12px; font-family:var(--font-mono);">${emp.canales_comunicacion || '{}'}</textarea>
+                                <small style="color:var(--text-muted); font-size:11px;">Ej: {"telegram": {"bot_token": "...", "chat_id": "..."}, "email": "admin@example.com"}</small>
+                            </div>
+                            <div style="grid-column: span 2;">
+                                <button class="btn btn-success" onclick="saveEmpresaPerfil()">
+                                    <i class="fa-solid fa-floppy-disk"></i> Guardar Perfil
+                                </button>
+                                <button class="btn btn-secondary" onclick="loadSettingsPanelData()" style="margin-left:8px;">
+                                    <i class="fa-solid fa-rotate"></i> Recargar
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } catch (e) { console.error(e); }
             }
+        }
+
+        async function saveEmpresaPerfil() {
+            const payload = {
+                nombre: document.getElementById('perfil-nombre').value.trim() || undefined,
+                rif: document.getElementById('perfil-rif').value.trim() || undefined,
+                telefono: document.getElementById('perfil-telefono').value.trim() || undefined,
+                direccion: document.getElementById('perfil-direccion').value.trim() || undefined,
+                pais: document.getElementById('perfil-pais').value.trim() || undefined,
+                sitio_web: document.getElementById('perfil-sitio-web').value.trim() || undefined,
+                vertical_negocio: document.getElementById('perfil-vertical').value.trim() || undefined,
+                descripcion_actividad: document.getElementById('perfil-descripcion').value.trim() || undefined,
+                mision: document.getElementById('perfil-mision').value.trim() || undefined,
+                vision: document.getElementById('perfil-vision').value.trim() || undefined,
+                objetivos_generales: document.getElementById('perfil-objetivos').value.trim() || undefined,
+                canales_comunicacion: document.getElementById('perfil-canales').value.trim() || '{}'
+            };
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/empresas/${selectedCompanyId}/perfil`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    addSystemLog('Perfil de empresa actualizado correctamente.', 'success');
+                    loadEmpresaResumen();
+                    loadSettingsPanelData();
+                } else {
+                    const err = await res.json();
+                    alert(err.detail);
+                }
+            } catch (e) { console.error(e); }
         }
 
         // 9. Agent Workspace Lifecycle & Realtime Chat
@@ -3395,6 +3534,41 @@
             loadAgentProfileData(agentId);
             // Load chat history
             loadAgentChatHistory(agentId);
+            // Populate catalog selects
+            loadToolsCatalogForAgent(agentId);
+        }
+
+        async function loadToolsCatalogForAgent(agentId) {
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/tools/catalogo`);
+                if (!res.ok) return;
+                const catalog = await res.json();
+
+                // Skills select
+                const skillsSelect = document.querySelector(`#wscontent-skills-${agentId} .skill-add-select`);
+                if (skillsSelect) {
+                    skillsSelect.innerHTML = '<option value="">+ Agregar skill...</option>';
+                    const allSkills = [...(catalog.hermes || []), ...(catalog.mcp || [])];
+                    allSkills.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s.id;
+                        opt.textContent = `${s.nombre} (${s.id})`;
+                        skillsSelect.appendChild(opt);
+                    });
+                }
+
+                // MCPs select
+                const mcpSelect = document.querySelectorAll(`#wscontent-skills-${agentId} .skill-add-select`)[1];
+                if (mcpSelect) {
+                    mcpSelect.innerHTML = '<option value="">+ Agregar MCP...</option>';
+                    (catalog.mcp || []).forEach(m => {
+                        const opt = document.createElement('option');
+                        opt.value = m.id;
+                        opt.textContent = `${m.nombre} (${m.id})`;
+                        mcpSelect.appendChild(opt);
+                    });
+                }
+            } catch (e) { console.error(e); }
         }
 
         function closeAgentWorkspace(agentId) {
@@ -3454,7 +3628,6 @@
                 // Fill simple fields
                 document.getElementById(`agent-profile-name-${agentId}`).value = agent.nombre || '';
                 document.getElementById(`agent-profile-rol-${agentId}`).value = agent.rol_prompt || '';
-                document.getElementById(`agent-profile-skills-${agentId}`).value = agent.habilidades || '';
                 document.getElementById(`agent-profile-objectives-${agentId}`).value = agent.objetivos || '';
 
                 // Load note select options
@@ -3496,11 +3669,74 @@
                 document.getElementById(`agent-profile-provider-${agentId}`).value = provider;
                 updateModelSelectOptions(agentId, model);
 
+                // Populate skills tab
+                const skillsContainer = document.getElementById(`native-skills-table-${agentId}`);
+                if (skillsContainer) {
+                    skillsContainer.innerHTML = '';
+                    let habilidades = [];
+                    if (agent.habilidades) {
+                        try { habilidades = JSON.parse(agent.habilidades); } catch(e) { habilidades = []; }
+                    }
+                    habilidades.forEach(h => {
+                        const card = document.createElement('div');
+                        card.className = 'skill-row';
+                        card.style.cssText = 'display:flex; gap:6px; margin-bottom:6px; align-items:center;';
+                        card.innerHTML = `
+                            <input type="text" class="skill-name-input" value="${h.nombre || ''}" placeholder="Nombre" style="flex:1; font-size:11px; padding:4px 6px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-white); color:var(--text-dark);">
+                            <input type="text" class="skill-desc-input" value="${h.descripcion || ''}" placeholder="Descripción" style="flex:2; font-size:11px; padding:4px 6px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-white); color:var(--text-dark);">
+                            <button class="btn btn-danger" style="padding:3px 6px; font-size:11px;" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
+                        `;
+                        skillsContainer.appendChild(card);
+                    });
+                }
+
+                // Populate active skills badges
+                const skillsBadgeContainer = document.getElementById(`active-skills-${agentId}`);
+                if (skillsBadgeContainer) {
+                    skillsBadgeContainer.innerHTML = '';
+                    let skillsActive = [];
+                    if (agent.skills_activos) {
+                        try { skillsActive = JSON.parse(agent.skills_activos); } catch(e) { skillsActive = []; }
+                    }
+                    skillsActive.forEach(s => {
+                        const badge = document.createElement('span');
+                        badge.className = 'skill-badge';
+                        badge.dataset.value = s;
+                        badge.style.cssText = 'display:inline-flex; align-items:center; gap:4px; padding:3px 8px; background:var(--odoo-primary); color:white; border-radius:12px; font-size:10px; margin:2px;';
+                        badge.innerHTML = `${s} <i class="fa-solid fa-xmark" style="cursor:pointer; opacity:0.7;" onclick="this.parentElement.remove()"></i>`;
+                        skillsBadgeContainer.appendChild(badge);
+                    });
+                }
+
+                // Populate active MCPs
+                const mcpsBadgeContainer = document.getElementById(`active-mcps-${agentId}`);
+                if (mcpsBadgeContainer) {
+                    mcpsBadgeContainer.innerHTML = '';
+                    let mcpsActive = [];
+                    if (agent.mcps_activos) {
+                        try { mcpsActive = JSON.parse(agent.mcps_activos); } catch(e) { mcpsActive = []; }
+                    }
+                    mcpsActive.forEach(m => {
+                        const badge = document.createElement('span');
+                        badge.className = 'skill-badge';
+                        badge.dataset.value = m;
+                        badge.style.cssText = 'display:inline-flex; align-items:center; gap:4px; padding:3px 8px; background:var(--odoo-secondary); color:white; border-radius:12px; font-size:10px; margin:2px;';
+                        badge.innerHTML = `${m} <i class="fa-solid fa-xmark" style="cursor:pointer; opacity:0.7;" onclick="this.parentElement.remove()"></i>`;
+                        mcpsBadgeContainer.appendChild(badge);
+                    });
+                }
+
                 // Update status indicator
                 updateAgentStatusUI(agentId, agent.status, agent.tarea_actual);
             } catch(e) {
                 console.error(e);
             }
+        }
+
+        // Load actividades and crons after agent workspace is visible
+        async function loadAgentHistoryTabs(agentId) {
+            loadAgentActividades(agentId);
+            loadAgentCrons(agentId);
         }
 
         async function saveActiveAgentConfig() {
@@ -3509,7 +3745,6 @@
 
             const name = document.getElementById(`agent-profile-name-${agentId}`).value.trim();
             const rol = document.getElementById(`agent-profile-rol-${agentId}`).value;
-            const skills = document.getElementById(`agent-profile-skills-${agentId}`).value;
             const objectives = document.getElementById(`agent-profile-objectives-${agentId}`).value;
             const provider = document.getElementById(`agent-profile-provider-${agentId}`).value;
             const model = document.getElementById(`agent-profile-model-${agentId}`).value;
@@ -3535,7 +3770,7 @@
                     empresa_id: selectedCompanyId,
                     nombre: name,
                     rol_prompt: rol,
-                    habilidades: skills,
+                    habilidades: origAgent.habilidades,
                     objetivos: objectives,
                     modelo_config: modelConfig,
                     conocimientos: JSON.stringify(selectedNotes),
@@ -3611,6 +3846,19 @@
             } catch(e) {
                 console.error(e);
                 addSystemLog("Error de red al chatear con el agente.", "error");
+            }
+        }
+
+        function switchWsTab(agentId, tab) {
+            ['params', 'skills', 'history', 'llm'].forEach(t => {
+                const btn = document.getElementById(`wstab-${t}-${agentId}`);
+                const content = document.getElementById(`wscontent-${t}-${agentId}`);
+                if (btn) btn.classList.toggle('active', t === tab);
+                if (content) content.style.display = t === tab ? 'block' : 'none';
+            });
+            if (tab === 'history') {
+                loadAgentActividades(agentId);
+                loadAgentCrons(agentId);
             }
         }
 
@@ -3753,6 +4001,299 @@
             try {
                 await fetch(`${apiBaseUrl}/api/grupos/${id}`, { method: 'DELETE' });
                 await loadSettingsPanelData();
+            } catch (e) { console.error(e); }
+        }
+
+        // ─────────────────────────────────────────
+        // SECCIÓN DE EMPRESA PERFIL
+        // ─────────────────────────────────────────
+        function switchAjustesSection(section) {
+            switchModule('ajustes');
+            switchSettingsPanel(section);
+        }
+
+        // ─────────────────────────────────────────
+        // SKILLS DEL AGENTE
+        // ─────────────────────────────────────────
+        function addNativeSkill(agentId) {
+            const container = document.getElementById(`native-skills-table-${agentId}`);
+            const card = document.createElement('div');
+            card.className = 'skill-row';
+            card.style.cssText = 'display:flex; gap:6px; margin-bottom:6px; align-items:center;';
+            card.innerHTML = `
+                <input type="text" class="skill-name-input" placeholder="Nombre" style="flex:1; font-size:11px; padding:4px 6px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-white); color:var(--text-dark);">
+                <input type="text" class="skill-desc-input" placeholder="Descripción" style="flex:2; font-size:11px; padding:4px 6px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-white); color:var(--text-dark);">
+                <button class="btn btn-danger" style="padding:3px 6px; font-size:11px;" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
+            `;
+            container.appendChild(card);
+        }
+
+        function addSkillToAgent(agentId, type, value, selectEl) {
+            if (!value) return;
+            const containerId = type === 'skills' ? `active-skills-${agentId}` : `active-mcps-${agentId}`;
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            // Check duplicate
+            const existing = container.querySelectorAll('.skill-badge');
+            for (let i = 0; i < existing.length; i++) {
+                if (existing[i].dataset.value === value) {
+                    selectEl.value = '';
+                    return;
+                }
+            }
+
+            const badge = document.createElement('span');
+            badge.className = 'skill-badge';
+            badge.dataset.value = value;
+            badge.style.cssText = 'display:inline-flex; align-items:center; gap:4px; padding:3px 8px; background:var(--odoo-primary); color:white; border-radius:12px; font-size:10px; margin:2px;';
+            badge.innerHTML = `${value} <i class="fa-solid fa-xmark" style="cursor:pointer; opacity:0.7;" onclick="this.parentElement.remove()"></i>`;
+            container.appendChild(badge);
+            selectEl.value = '';
+        }
+
+        async function saveAgentSkills(agentId) {
+            const nativeRows = document.querySelectorAll(`#native-skills-table-${agentId} .skill-row`);
+            const habilidades = [];
+            nativeRows.forEach(row => {
+                const name = row.querySelector('.skill-name-input')?.value?.trim();
+                const desc = row.querySelector('.skill-desc-input')?.value?.trim();
+                if (name) habilidades.push({ nombre: name, descripcion: desc || '' });
+            });
+
+            const skillsActive = [];
+            document.querySelectorAll(`#active-skills-${agentId} .skill-badge`).forEach(b => {
+                skillsActive.push(b.dataset.value);
+            });
+
+            const mcpsActive = [];
+            document.querySelectorAll(`#active-mcps-${agentId} .skill-badge`).forEach(b => {
+                mcpsActive.push(b.dataset.value);
+            });
+
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/agentes/${agentId}`);
+                if (!res.ok) return;
+                const agent = await res.json();
+
+                const payload = {
+                    empresa_id: agent.empresa_id,
+                    nombre: agent.nombre,
+                    rol_prompt: agent.rol_prompt,
+                    status: agent.status,
+                    tarea_actual: agent.tarea_actual,
+                    habilidades: JSON.stringify(habilidades),
+                    objetivos: agent.objetivos,
+                    recursos: agent.recursos,
+                    conocimientos: agent.conocimientos,
+                    herramientas: agent.herramientas,
+                    modelo_config: agent.modelo_config,
+                    skills_activos: JSON.stringify(skillsActive),
+                    mcps_activos: JSON.stringify(mcpsActive),
+                    permisos_api: agent.permisos_api
+                };
+
+                const updateRes = await fetch(`${apiBaseUrl}/api/agentes/${agentId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (updateRes.ok) {
+                    addSystemLog(`Habilidades del agente guardadas correctamente.`, 'success');
+                } else {
+                    alert('Error al guardar habilidades.');
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // ─────────────────────────────────────────
+        // ACTIVIDADES DEL AGENTE
+        // ─────────────────────────────────────────
+        function openAddActividadModal(agentId) {
+            document.getElementById('actividad-agente-id').value = agentId;
+            document.getElementById('actividad-tipo').value = 'tarea';
+            document.getElementById('actividad-titulo').value = '';
+            document.getElementById('actividad-descripcion').value = '';
+            document.getElementById('actividad-estado').value = 'completado';
+            openModal('modal-actividad');
+        }
+
+        async function submitActividad() {
+            const agentId = document.getElementById('actividad-agente-id').value;
+            const tipo = document.getElementById('actividad-tipo').value;
+            const titulo = document.getElementById('actividad-titulo').value.trim();
+            const descripcion = document.getElementById('actividad-descripcion').value.trim();
+            const estado = document.getElementById('actividad-estado').value;
+
+            if (!titulo) { alert('El título es obligatorio.'); return; }
+
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/agentes/${agentId}/actividades`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tipo, titulo, descripcion, estado })
+                });
+                if (res.ok) {
+                    closeModal('modal-actividad');
+                    loadAgentActividades(parseInt(agentId));
+                } else {
+                    const err = await res.json();
+                    alert(err.detail);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadAgentActividades(agentId) {
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/agentes/${agentId}/actividades`);
+                if (!res.ok) return;
+                const actividades = await res.json();
+                const container = document.getElementById(`actividades-list-${agentId}`);
+                if (!container) return;
+
+                if (actividades.length === 0) {
+                    container.innerHTML = '<div class="skills-empty-state">Sin actividades registradas.</div>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                actividades.forEach(act => {
+                    const dotClass = `actividad-dot ${act.tipo || 'tarea'}`;
+                    const time = new Date(act.timestamp).toLocaleString();
+                    container.innerHTML += `
+                        <div class="actividad-item" style="border-bottom:1px solid var(--border-color); padding:8px 0;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span class="${dotClass}"></span>
+                                <strong style="font-size:12px;">${act.titulo}</strong>
+                                <span style="font-size:10px; color:var(--text-muted); margin-left:auto;">${time}</span>
+                                <button class="btn btn-danger" style="padding:2px 5px; font-size:9px;" onclick="deleteActividad(${agentId}, ${act.id})">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                            ${act.descripcion ? `<div style="font-size:11px; color:var(--text-muted); margin-top:4px; margin-left:16px;">${act.descripcion}</div>` : ''}
+                            <div style="font-size:10px; margin-top:2px; margin-left:16px;">
+                                <span style="color:${act.estado === 'completado' ? 'green' : act.estado === 'error' ? 'red' : 'gray'};">● ${act.estado}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function deleteActividad(agentId, actividadId) {
+            if (!confirm('¿Eliminar esta actividad?')) return;
+            try {
+                await fetch(`${apiBaseUrl}/api/agentes/${agentId}/actividades/${actividadId}`, { method: 'DELETE' });
+                loadAgentActividades(agentId);
+            } catch (e) { console.error(e); }
+        }
+
+        // ─────────────────────────────────────────
+        // CRONS DEL AGENTE
+        // ─────────────────────────────────────────
+        function openAddCronModal(agentId) {
+            document.getElementById('cron-agente-id').value = agentId;
+            document.getElementById('cron-edit-id').value = '';
+            document.getElementById('cron-nombre').value = '';
+            document.getElementById('cron-descripcion').value = '';
+            document.getElementById('cron-expresion').value = '';
+            document.getElementById('cron-activo').checked = true;
+            openModal('modal-cron');
+        }
+
+        async function submitCron() {
+            const agentId = document.getElementById('cron-agente-id').value;
+            const editId = document.getElementById('cron-edit-id').value;
+            const nombre = document.getElementById('cron-nombre').value.trim();
+            const descripcion = document.getElementById('cron-descripcion').value.trim();
+            const expresion = document.getElementById('cron-expresion').value.trim();
+            const activo = document.getElementById('cron-activo').checked;
+
+            if (!nombre) { alert('El nombre es obligatorio.'); return; }
+            if (!expresion) { alert('La expresión cron es obligatoria.'); return; }
+
+            try {
+                let url = `${apiBaseUrl}/api/agentes/${agentId}/crons`;
+                let method = 'POST';
+                let body = JSON.stringify({ nombre, descripcion, expresion_cron: expresion, activo });
+
+                if (editId) {
+                    url += `/${editId}`;
+                    method = 'PUT';
+                }
+
+                const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body });
+                if (res.ok) {
+                    closeModal('modal-cron');
+                    loadAgentCrons(parseInt(agentId));
+                } else {
+                    const err = await res.json();
+                    alert(err.detail);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadAgentCrons(agentId) {
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/agentes/${agentId}/crons`);
+                if (!res.ok) return;
+                const crons = await res.json();
+                const container = document.getElementById(`crons-list-${agentId}`);
+                if (!container) return;
+
+                if (crons.length === 0) {
+                    container.innerHTML = '<div class="skills-empty-state">Sin crons programados.</div>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                crons.forEach(cron => {
+                    container.innerHTML += `
+                        <div class="cron-item" style="border-bottom:1px solid var(--border-color); padding:8px 0;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <i class="fa-solid fa-clock" style="color:var(--odoo-secondary); font-size:12px;"></i>
+                                <strong style="font-size:12px;">${cron.nombre}</strong>
+                                <span style="font-size:10px; color:${cron.activo ? 'green' : 'red'};">${cron.activo ? 'Activo' : 'Inactivo'}</span>
+                                <span style="margin-left:auto; display:flex; gap:4px;">
+                                    <button class="btn" style="padding:2px 5px; font-size:9px;" onclick="editCron(${agentId}, ${cron.id})"><i class="fa-solid fa-pen"></i></button>
+                                    <button class="btn btn-danger" style="padding:2px 5px; font-size:9px;" onclick="deleteCron(${agentId}, ${cron.id})"><i class="fa-solid fa-trash"></i></button>
+                                </span>
+                            </div>
+                            ${cron.descripcion ? `<div style="font-size:11px; color:var(--text-muted); margin-top:4px; margin-left:20px;">${cron.descripcion}</div>` : ''}
+                            <div style="font-size:10px; margin-top:2px; margin-left:20px; color:var(--text-muted);">
+                                <code>${cron.expresion_cron}</code>
+                                ${cron.proxima_ejecucion ? ` | Próxima: ${new Date(cron.proxima_ejecucion).toLocaleString()}` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function editCron(agentId, cronId) {
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/agentes/${agentId}/crons`);
+                if (!res.ok) return;
+                const crons = await res.json();
+                const cron = crons.find(c => c.id === cronId);
+                if (!cron) return;
+
+                document.getElementById('cron-agente-id').value = agentId;
+                document.getElementById('cron-edit-id').value = cronId;
+                document.getElementById('cron-nombre').value = cron.nombre;
+                document.getElementById('cron-descripcion').value = cron.descripcion || '';
+                document.getElementById('cron-expresion').value = cron.expresion_cron;
+                document.getElementById('cron-activo').checked = cron.activo;
+                openModal('modal-cron');
+            } catch (e) { console.error(e); }
+        }
+
+        async function deleteCron(agentId, cronId) {
+            if (!confirm('¿Eliminar este cron programado?')) return;
+            try {
+                await fetch(`${apiBaseUrl}/api/agentes/${agentId}/crons/${cronId}`, { method: 'DELETE' });
+                loadAgentCrons(agentId);
             } catch (e) { console.error(e); }
         }
 
